@@ -468,7 +468,7 @@ def start():
 		if input_state_strainG == True and strainGauge_active == False:
 			localtime = time.asctime( time.localtime(time.time()))
 			localtimeStr = str(localtime).replace(" ", "_")
-			callInput = "sudo ./home/pi/Desktop/daq/radberry314/ADC/ADDAcode/Raspberry/strain/strainTest " + localtimeStr
+			callInput = "./home/pi/Desktop/daq/radberry314/ADC/ADDAcode/Raspberry/strain/strainTest " + localtimeStr
 			countStrainGuage += 1
 			call(callInput, shell=True)
 			strainGauge_active = True

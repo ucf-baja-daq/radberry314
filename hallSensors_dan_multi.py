@@ -85,7 +85,7 @@ class HallThread ():
 		# based on pin number and counter
 		localtime = time.asctime( time.localtime(time.time()))
 		localtimeStr = str(localtime).replace(" ", "_")
-		self.file_str = "data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
+		self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
 		self.text_file = open(self.file_str, "w")
 		
 		# initial time for time vector
@@ -187,7 +187,7 @@ class HallSensorInterrupt():
 		# based on pin number and counter
 		localtime = time.asctime( time.localtime(time.time()))
 		localtimeStr = str(localtime).replace(" ", "_")
-		self.file_str = "data/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".txt"
+		self.file_str = "/home/pi/Desktop/data/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".txt"
 		self.text_file = open(self.file_str, "w")
 		
 		# initial time for time vector
@@ -386,9 +386,9 @@ def start():
 	sevsegProcess.daemon = True
 	sevsegProcess.start()
 	
-	print("hi")
+	#print("hi")
 	
-	inputCommand = ""
+	#inputCommand = ""
 
 	countStrainGuage = 0
 
@@ -468,7 +468,7 @@ def start():
 		if input_state_strainG == True and strainGauge_active == False:
 			localtime = time.asctime( time.localtime(time.time()))
 			localtimeStr = str(localtime).replace(" ", "_")
-			callInput = "sudo ./../ADC/ADDAcode/Raspberry/strain/strainTest " + localtimeStr
+			callInput = "sudo ./home/pi/Desktop/daq/radberry314/ADC/ADDAcode/Raspberry/strain/strainTest " + localtimeStr
 			countStrainGuage += 1
 			call(callInput, shell=True)
 			strainGauge_active = True

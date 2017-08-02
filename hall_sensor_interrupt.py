@@ -7,7 +7,7 @@ class HallSensorInterrupt():
 	pulse = 0
 	start_timer = time.time()
 
-	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, diameter):
+	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, hallLedPins, diameter):
 		#threading.Thread.__init__(self)
 		print("Initializing Hall Sensor on pin " + str(pinNumber) + ".")
 		self.threadID = threadID

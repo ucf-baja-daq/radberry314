@@ -1,8 +1,10 @@
-from subprocess import call
 import RPi.GPIO as GPIO
 from time import sleep
-from shutdownPi import shutdown 
 from timeit import default_timer as timer 
+from subprocess import call
+
+from shutdown_pi import shutdown
+from main import Main
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -25,6 +27,8 @@ GPIO.output(38, GPIO.HIGH)
 GPIO.output(36, GPIO.LOW)
 sleep(0.25)
 
+main = Main()
+
 print("Waiting for Toggle Input")
 
 input_state = GPIO.input(40)
@@ -44,8 +48,8 @@ while True:
 	
 	
 	if input_state_fire == False:		# if missle switch is down
-		call("python3 hallSensors_dan_multi.py", shell=True)
-	# TODO fix immediate shutdown on boot if the switches are in this position
+		# call("python3 hallSensors_dan_multi.py", shell=True)
+		main.start()
 	elif input_state_fire == True and input_state == True and input_state_strainG == True:		# if missle switch is up
 		startTime = timer()																			# and hall sen switch is up
 		flag = 0																					# and strain gauge switch is up

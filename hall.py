@@ -1,9 +1,9 @@
-class HallThread ():
+class Hall ():
 	
 	# initiate myThread object
 	# threadID hallSensor position ("cvt" or "sec")
 	# name - thread name 
-	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, diameter, gearBoxRatio,resFlag):
+	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, hallLedPins, diameter, gearBoxRatio,resFlag):
 		#threading.Thread.__init__(self)
 		print("Initializing Hall Sensor on pin " + str(pinNumber) + ".")
 		self.threadID = threadID

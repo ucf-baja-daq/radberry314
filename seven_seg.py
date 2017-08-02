@@ -1,5 +1,5 @@
-class SevenSegThread():
-	def __init__(self, threadID, name):
+class SevenSeg():
+	def __init__(self, threadID, name, segments, digits):
 		#hreading.Thread.__init__(self)
 		print("Initializing Seven Segment Display.")
 		self.threadID = threadID

@@ -1,3 +1,5 @@
+import glob
+
 class Hall ():
 	
 	# initiate myThread object
@@ -26,7 +28,21 @@ class Hall ():
 		# based on pin number and counter
 		localtime = time.asctime( time.localtime(time.time()))
 		localtimeStr = str(localtime).replace(" ", "_")
-		self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
+		
+		# check if usb is plugged in
+		# if so, write to usb. if not, write to pi and set a flag (TODO)
+		# so the next time a usb is plugged in, the files written
+		# since the flag was created will be moved over
+
+		# search for usb dir
+		usbDir = glob.glob("/media/pi/*")
+
+		# if usb dir exists
+		if usbDir.len() > 0:
+			self.file_str = usbDir[0] + "hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
+		else:
+			self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
+
 		self.text_file = open(self.file_str, "w")
 		
 		# initial time for time vector

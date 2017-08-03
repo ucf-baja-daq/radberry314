@@ -1,13 +1,5 @@
-# main Data Acqusition code
-# runs on RPi boot
-
-# we want this code to run on the pi's boot
-# what should run on boot
-#	-speedometer
-
-# what should run via toggle switches
-#	-CVT/gearbox data collection
-#	-strain gauge data collection
+# main - collection standby mode
+# reads toggle switches to begin hall sensor and strain gauge collection
 
 import RPi.GPIO as GPIO
 import threading

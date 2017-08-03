@@ -26,8 +26,6 @@ GPIO.setup(36, GPIO.OUT) #IO 16 led 2
 GPIO.output(38, GPIO.LOW)
 GPIO.output(36, GPIO.LOW)
 
-
-
 # create Main object - to enter collection standby mode
 main = Main()
 
@@ -79,7 +77,6 @@ while True:
 			sleep(0.05)
 			flag = 1
 			
-			
 		if flag == 1:
 			break
 	
@@ -91,5 +88,5 @@ while True:
 	GPIO.output(36, GPIO.LOW)
 	sleep(0.24)
 
-#print("Shutting down.. lol jk, but it works")
+# when main loop is broken out of, shutdown pi
 shutdown()

@@ -7,6 +7,9 @@ class SevenSeg():
 		#hreading.Thread.__init__(self)
 		print("Initializing Seven Segment Display.")
 		
+		self.segments = segments
+		self.digits = digits
+		
 		self.ON = 0
 		self.OFF = 1
 		
@@ -29,11 +32,11 @@ class SevenSeg():
 						 
 		self.numKeys = [' ','0','1','2','3','4','5','6','7','8','9','B', 'A', 'J', 'C']
 		
-		for seg in segments:
+		for seg in self.segments:
 			GPIO.setup(seg, GPIO.OUT)
 			GPIO.output(seg, False);
 			
-		for dig in digits:
+		for dig in self.digits:
 			GPIO.setup(dig, GPIO.OUT)
 			GPIO.output(dig, False)
 			
@@ -51,7 +54,7 @@ class SevenSeg():
 			
 		self.k = 3
 		for i in range(self.length - 1, -1, -1):
-			self.actualDigits[i] = digits[self.k]
+			self.actualDigits[i] = self.digits[self.k]
 			self.k = self.k - 1
 					
 		print("Seven Seg SetUp: Done.\n")	
@@ -89,7 +92,7 @@ class SevenSeg():
 
 			self.k = 3
 			for i in range (self.length - 1, -1, -1):
-				self.actualDigits[i] = digits[self.k]
+				self.actualDigits[i] = self.digits[self.k]
 				self.k = self.k - 1
 
 			i = 0
@@ -99,7 +102,7 @@ class SevenSeg():
 
 				j = 0
 				for val in onOFF_value:
-					GPIO.output( segments[j], val )
+					GPIO.output( self.segments[j], val )
 					j = j + 1
 
 				GPIO.output(dig, True)

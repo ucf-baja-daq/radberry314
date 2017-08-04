@@ -3,7 +3,7 @@ from time import sleep
 from timeit import default_timer as timer 
 from subprocess import call
 
-from shutdown_pi import shutdown
+from shutdown import shutdown
 from main import Main
 
 # ------------------------------ #

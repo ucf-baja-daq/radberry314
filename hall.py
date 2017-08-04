@@ -1,4 +1,8 @@
 import glob
+import RPi.GPIO as GPIO
+import time
+import math
+from timeit import default_timer as timer 
 
 class Hall ():
 	

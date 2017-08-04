@@ -12,7 +12,7 @@ from subprocess import call
 from seven_seg import SevenSeg
 from hall import Hall
 
-class Main()
+class Main():
 	def __init__(self):
 		# flag to exit the program
 		self.exitFlag = 0
@@ -39,9 +39,6 @@ class Main()
 
 		self.speedNumber = 4444
 
-		self.ON = 0
-		self.OFF = 1
-
 		# the switch doesnt run with a pull down configuration
 		# the two pins closer to what you want to be the ON position
 		# should be connected to give a TRUE value in that position
@@ -64,14 +61,14 @@ class Main()
 		queue = Queue()
 		queue.put("BAJA")
 
-		sevsegObj = SevenSeg(3, "sevSeg", self.segments, self.digits)
+		sevsegObj = SevenSeg(self.segments, self.digits)
 		sevsegProcess = Process(target=sevsegObj.run, args=(queue,))		# do not delete this goddamn comma! please :)
 		sevsegProcess.daemon = True
 		sevsegProcess.start()
 		
 		countStrainGuage = 0
 
-		while exitFlag == 0:
+		while self.exitFlag == 0:
 			input_state = GPIO.input(40)			# hall sen
 			input_state_fire = GPIO.input(3)		# missle switch
 			input_state_strainG = GPIO.input(5)		# strain gauge

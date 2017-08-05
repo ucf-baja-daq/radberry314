@@ -40,13 +40,12 @@ class Hall ():
 
 		# search for usb dir
 		usbDir = glob.glob("/media/pi/*")
-		print(usbDir[0])
 
 		# if usb dir exists
-		if usbDir.len() > 0:
-			self.file_str = usbDir[0] + "/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
+		if len(usbDir) > 0:
+			self.file_str = usbDir[0] + "/hallSen_Data"+ str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
 		else:
-			self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
+			self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
 
 		self.text_file = open(self.file_str, "w")
 		
@@ -72,12 +71,11 @@ class Hall ():
 		global speedNumber
 		self.counter = 0
 		
-		while self.runningFlag == 1:
-			self.input_hallSen = GPIO.input( self.pinNumber )
+		while self.runningFlag == 1:				
 			# self.curTime = time.time() - self.initTime
 			self.curTime = timer() - self.initTime
 			
-			if self.input_hallSen == self.isHallSenWithBoard and self.hallFlag == 0:
+			if self.hallFlag == 0:
 				GPIO.output(self.ledPin, GPIO.HIGH)
 				self.hallFlag = 1
 				self.t1 = self.t2													# stores the previous current time from curTime
@@ -85,7 +83,7 @@ class Hall ():
 				self.rpm = 60/(self.t2 - self.t1)
 				if (self.rpm > 9999):
 					self.rpm = self.rpm / 1000
-				self.mph = self.rpm * math.pi * self.diameter / 1056 / self.gearBoxRatio
+				self.mph = self.rpm * math.pi * self.diameter / 1056
 				
 				#sharedValues.setSpeed(int(self.rpm))
 				#speedNumber = int(self.rpm)
@@ -107,15 +105,15 @@ class Hall ():
 				#	self.counter += 1
 				#self.text_file.flush()
 				GPIO.output(self.ledPin, GPIO.LOW)
-			elif self.input_hallSen == self.isHallSenWithBoard and self.hallFlag == 1:
+			elif self.hallFlag == 1:
 				self.filler = 0
 			
 			else:
 				self.hallFlag = 0
+				
 			time.sleep(0.00005)		#could be wrong, but also tried 0.0005 and seemed to work
 		
-		self.text_file.write(str(timer()-self.initTime))
-		self.text_file.write("END OF DATA")
+		print('Closing file ' + self.file_str)
 		self.text_file.flush()
 		self.text_file.close()
 	

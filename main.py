@@ -136,6 +136,8 @@ class Main():
 				hall1.setFlag(0)
 				hall2.setFlag(0)
 				
+				time.sleep(0.5)
+				
 				hall1Process.terminate()
 				hall2Process.terminate()
 				

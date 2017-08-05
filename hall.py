@@ -43,11 +43,7 @@ class Hall ():
 		print(usbDir[0])
 
 		# if usb dir exists
-<<<<<<< HEAD
-		if len(usbDir) > 0:
-=======
 		if usbDir.len() > 0:
->>>>>>> 7d457020575a32bc4997fd77fd3560f797115107
 			self.file_str = usbDir[0] + "/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"
 		else:
 			self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + localtimeStr + ".csv"

@@ -42,8 +42,10 @@ class Main():
 		# the switch doesnt run with a pull down configuration
 		# the two pins closer to what you want to be the ON position
 		# should be connected to give a TRUE value in that position
+		print('Set up main object.')
 		
 	def start(self):
+		print('Run main object.')
 		counter = 0
 		switchFlag = 0
 
@@ -67,6 +69,8 @@ class Main():
 		sevsegProcess.start()
 		
 		countStrainGuage = 0
+
+		print('Waiting for data collection toggle.')
 
 		while self.exitFlag == 0:
 			input_state = GPIO.input(40)			# hall sen
@@ -97,7 +101,7 @@ class Main():
 				switchFlag = 1
 				counter += 1
 				
-				print("\nSwitch on.\n")	
+				print("\nHall sensor switch on.\n")	
 				# start the hallsensor thread
 				hall1 = Hall(1, "hall1", counter, 35, 1, self.hallLedPins, 23,11.1,0)
 				hall2 = Hall(2, "hall2", counter, 37, 2, self.hallLedPins, 23,11.1,1)

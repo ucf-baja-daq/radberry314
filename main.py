@@ -103,8 +103,8 @@ class Main():
 				
 				print("\nHall sensor switch on.\n")	
 				# start the hallsensor thread
-				hall1 = Hall(1, "hall1", counter, 35, 1, self.hallLedPins, 23,11.1,0)
-				hall2 = Hall(2, "hall2", counter, 37, 2, self.hallLedPins, 23,11.1,1)
+				hall1 = Hall(counter, 35, 1, self.hallLedPins, 23,11.1,0)
+				hall2 = Hall(counter, 37, 2, self.hallLedPins, 23,11.1,1)
 				
 				#hall1 = HallSensorInterrupt(1, "hall1", counter, 35, 1, 22)
 				#hall2 = HallSensorInterrupt(2, "hall2", counter, 37, 2, 22)
@@ -136,7 +136,7 @@ class Main():
 				hall1.setFlag(0)
 				hall2.setFlag(0)
 				
-				time.sleep(0.5)
+				time.sleep(1)
 				
 				hall1Process.terminate()
 				hall2Process.terminate()

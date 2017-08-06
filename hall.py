@@ -5,21 +5,15 @@ import math
 from timeit import default_timer as timer 
 
 class Hall ():
-	
-	# initiate myThread object
-	# threadID hallSensor position ("cvt" or "sec")
-	# name - thread name 
-	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, hallLedPins, diameter, gearBoxRatio,resFlag):
+	def __init__(self, counter, pinNumber, hallSensor_Num, hallLedPins, diameter, gearBoxRatio,resFlag):
 		#threading.Thread.__init__(self)
 		print("Initializing Hall Sensor on pin " + str(pinNumber) + ".")
-		self.threadID = threadID
-		self.name = name
 		self.pinNumber = pinNumber
 		self.diameter = diameter
 		self.gearBoxRatio = gearBoxRatio
-		self.runningFlag = 1
 		self.ledPin = hallLedPins[hallSensor_Num - 1]
 		
+		self.runningFlag = 1
 		self.isHallSenWithBoard = False
 		
 		# setup input pin for hallsensor
@@ -61,8 +55,8 @@ class Hall ():
 		
 		print("Done.\n")
 		
-		
-		
+
+
 	def run(self, q, useQueue):
 		print("Running hall sensor on pin " + str(self.pinNumber) + ".")
 		print("Writing to " + self.file_str)
@@ -71,19 +65,18 @@ class Hall ():
 		global speedNumber
 		self.counter = 0
 		
-		while self.runningFlag == 1:				
+		while self.runningFlag == 1:	
+			self.input_hallSen = GPIO.input( self.pinNumber )			
 			# self.curTime = time.time() - self.initTime
 			self.curTime = timer() - self.initTime
 			
-			if self.hallFlag == 0:
+			if self.input_hallSen == self.isHallSenWithBoard and self.hallFlag == 0:
 				GPIO.output(self.ledPin, GPIO.HIGH)
 				self.hallFlag = 1
 				self.t1 = self.t2													# stores the previous current time from curTime
 				self.t2 = self.curTime											# stores the current time in curTime
 				self.rpm = 60/(self.t2 - self.t1)
-				if (self.rpm > 9999):
-					self.rpm = self.rpm / 1000
-				self.mph = self.rpm * math.pi * self.diameter / 1056
+				#self.mph = self.rpm * math.pi * self.diameter / 1056
 				
 				#sharedValues.setSpeed(int(self.rpm))
 				#speedNumber = int(self.rpm)
@@ -105,8 +98,8 @@ class Hall ():
 				#	self.counter += 1
 				#self.text_file.flush()
 				GPIO.output(self.ledPin, GPIO.LOW)
-			elif self.hallFlag == 1:
-				self.filler = 0
+			elif self.input_hallSen == self.isHallSenWithBoard and self.hallFlag == 1:
+				pass
 			
 			else:
 				self.hallFlag = 0

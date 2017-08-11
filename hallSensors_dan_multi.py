@@ -15,6 +15,7 @@ import math
 from timeit import default_timer as timer 
 from multiprocessing import Process, Queue
 import shutdownPi
+import glob
 
 #import ../ADC/ADDAcode/Raspberry/strain/strainTestPythonExt
 #import ../ADC/ADDAcode/Raspberry/strain/strainExtTEST
@@ -96,7 +97,7 @@ class HallThread ():
 
 		# if usb dir exists
 		if len(usbDir) > 0:
-			self.file_str = usbDir[0] + "/hallSen_Data"+ str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
+			self.file_str = usbDir[-1] + "/hallSen_Data"+ str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
 		else:
 			self.file_str = "/home/pi/Desktop/data/HallSensors/hallSen_Data"+ str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
 

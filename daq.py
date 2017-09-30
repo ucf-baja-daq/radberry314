@@ -13,18 +13,18 @@ from shutdownPi import shutdown
 def shutdown(q):
 	startTime = timer()																			# and hall sen switch is up
 	flag = 0																					# and strain gauge switch is up
-																								
+
 	print("Shutting down in 5 seconds. Toggle any switch to cancel.")
-	
+
 	diff = int(timer() - startTime)
-	
+
 	while (diff < 5):
 		input_state = GPIO.input(40)
 		input_state_fire = GPIO.input(3)
-		input_state_strainG = GPIO.input(5)	
+		input_state_strainG = GPIO.input(5)
 		if not q.get() == diff:
 			q.put(diff)
-		
+
 		if input_state_fire == False or input_state == False or input_state_strainG == False:
 			flag = 0
 			print("Cancelling shutdown.")
@@ -33,7 +33,7 @@ def shutdown(q):
 		sleep(0.05)
 		flag = 1
 		diff = int(timer() - startTime)
-		
+
 	if flag == 1:
 		#call("sudo shutdown -h now", shell=True)
 		print("shutdown pi")
@@ -45,10 +45,10 @@ class SevenSegDisplay():
 		print("Setting up display.")
 		self.ON = 0
 		self.OFF = 1
-		
+
 		self.segments = [7,21,13,23,15,18,31,32]
 		self.digits = [33,29,22,16]
-		
+
 		#					  e	d	dp   c	g	b	f	a
 		self.numbers = { ' ':[self.OFF, self.OFF, self.OFF, self.OFF, self.OFF, self.OFF, self.OFF, self.OFF],
 						 '0':[self.ON , self.ON , self.OFF, self.ON , self.OFF, self.ON , self.ON , self.ON ],
@@ -91,7 +91,7 @@ class SevenSegDisplay():
 			if not q.empty():
 				# put queue variable in temp
 				temp = q.get()
-				
+
 				# if queue is BAJA or clear, put it in buffer
 				if temp == "BAJA" or temp == 'C':
 					self.buffer = temp
@@ -162,9 +162,9 @@ GPIO.output(38, GPIO.LOW)
 GPIO.output(36, GPIO.LOW)
 print("Done.\n")
 
-print("Waiting for missle switch.")
+print("Waiting for Missle Switch.")
 
-# read toggle switches
+# read toggle switchess
 missile_input = GPIO.input(40)
 strain_input = GPIO.input(5)
 hall_input = GPIO.input(3)
@@ -202,7 +202,7 @@ while True:
 	# if all switches are up, shutdown pi
 	elif missile_input and strain_input and hall_input:
 		shutdown(q)
-		
+
 	GPIO.output(38, GPIO.LOW)
 	GPIO.output(36, GPIO.HIGH)
 	queue.put("BAJA")

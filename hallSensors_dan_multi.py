@@ -51,7 +51,7 @@ class HallThread ():
 	# This class represents a hall sensor
 	# each sensor takes data individually and writes to its own file
 
-	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, diameter, gearBoxRatio,resFlag):
+	def __init__(self, threadID, name, counter, pinNumber, hallSensor_Num, diameter, gearBoxRatio):
 		print("Initializing Hall Sensor on pin " + str(pinNumber) + ".")
 
 		# initialize arguments
@@ -67,16 +67,13 @@ class HallThread ():
 		self.isHallSenWithBoard = False
 
 		# setup input pin for hallsensor
-		if resFlag == 0:
-			GPIO.setup( pinNumber, GPIO.IN )
-		elif resFlag==1:
-			GPIO.setup(pinNumber,GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		GPIO.setup(pinNumber,GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 		# open file to write to
 		# based on pin number and counter
 		localtime = time.asctime( time.localtime(time.time()))
 		localtimeStr = str(localtime).replace(" ", "_")
-		
+
 		# check if usb is plugged in
 		# if so, write to usb. if not, write to pi and set a flag (TODO)
 		# so the next time a usb is plugged in, the files written
@@ -430,8 +427,8 @@ def start():
 
 			print("\nSwitch on.\n")
 			# start the hallsensor thread
-			hall1 = HallThread(1, "hall1", counter, 35, 1, 23,11.1,0)
-			hall2 = HallThread(2, "hall2", counter, 37, 2, 23,11.1,1)
+			hall1 = HallThread(1, "hall1", counter, 35, 1, 23,11.1)
+			hall2 = HallThread(2, "hall2", counter, 37, 2, 23,11.1)
 
 			#hall1 = HallSensorInterrupt(1, "hall1", counter, 35, 1, 22)
 			#hall2 = HallSensorInterrupt(2, "hall2", counter, 37, 2, 22)

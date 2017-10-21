@@ -8,26 +8,37 @@ from multiprocessing import Process, Queue
 import glob     # used to find the flash drives
 
 # Main Setup
+
+print("Setting up RPi.")
+
+# toggle switch pin numbers
 missile_switch_pin_number = 3
 strain_gauge_pin_number   = 5
 hall_sensor_pin_number    = 40
 
+# led pin numbers
 led_1_pin_number = 38
 led_2_pin_number = 36
 
+# hall sensor pin numbers
 hall_1_pin_number = 35
 hall_2_pin_number = 37
 
+# Raspberry pi pin numbering setup
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
+
+# setup pinouts
 GPIO.setup(missile_switch_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(hall_sensor_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(strain_gauge_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(led_1_pin_number, GPIO.OUT)
 GPIO.setup(led_2_pin_number, GPIO.OUT)
 
+# default leds to off
 GPIO.output(led_1_pin_number, GPIO.LOW)
 GPIO.output(led_2_pin_number, GPIO.LOW)
+
 print("Done GPIO Setup.\n")
 
 exitFlag = 0
@@ -49,10 +60,10 @@ OFF = 1
 class HallThread():
     # This class represents a hall sensor
     # each sensor takes data individually and writes to its own file
-    
+
     def __init__(self, threadID, name, counter,  pinNumber, hallSensor_Num, diameter, gearBoxRatio, resFlag):
         print("Initializing Hall Sensor on Pin " + str(pinNumber) + ".")
-        
+
         # initialize arguments
         self.threadID     = threadID
         self.name         = name
@@ -61,116 +72,116 @@ class HallThread():
         self.gearBoxRatio = gearBoxRatio
         self.runningFlag  = 1
         self.ledPin       = hallLedPins[hallSensor_Num - 1]
-        
+
         # used to determine hall sensor trip state
         self.isHallSenWithBoard = False
-        
+
         # setup input pin for hallsensor
         if resFlag == 0:
             GPIO.setup( pinNumber, GPIO.IN )
         elif resFlag == 1:
             GPIO.setup( pinNumber, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-            
+
         # open file to write to
         # based on pin number and counter
         localtime = time.asctime( time.localtime(time.time()))
         localtimeStr = str(localtime).replace(" ", "_")
-        
+
         # Check if usb is plugged in.
         # If so, write to usb.
         # If not, write to pi and set a flag (TODO)
         # so the next time a usb is plugged in, the files written
         # since the flag was created will be moved over
-        
+
         # search for usb dir
         usbDir = glob.glob("/media/pi/*")
-        
+
         # if usb dir exists
         if len(usbDir) > 0:
             self.file_str = usbDir[-1] + "/hallSen_Data" + str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
         else:
             self.file_str = "/home/pi/Desktop/data/HallSensor/hallSen_Data" + str(pinNumber) + "_" + str.replace(localtimeStr, ':', '-') + ".csv"
-            
+
         self.text_file = open(self.file_str, "w")
-        
+
         # initial time for the time vector
         # self.initTime = time.time()
         self.initTime = timer()
-        
+
         # initialize
         self.time1     = 0
         self.time2     = 0
         self.hallFlag  = 0
         self.gearRatio = 11.5
-        
+
         print("Done with Hall Sensor Init.\n")
-        
+
     def run(self, queue_reference, useQueue):
         print("Running hall sensor on pin " + str(self.pinNumber) + ".")
         print("Writing to " + self.file_str)
-        
-        
+
+
         global speedNumber
         self.counter = 0
-        
+
         # TODO need to give this value by queue
         while self.runningFlag == 1:
             self.input_hallSen = GPIO.input( self.pinNumber )
             self.curTime = timer() - self.initTime
-            
+
             if self.input_hallSen == self.isHallSenWithBoard and self.hallFlag == 0:
                 GPIO.output(self.ledPin, GPIO.HIGH)
                 self.hallFlag = 1
-                
+
                 # store current time in time2 and move previous time into time1
                 self.time1, self.time2 = self.time2, self.curTime
-                
+
                 # calculate rpm based on time difference (1 revolution)
                 self.rpm = 60/(self.time2 - self.time1)
-                
+
                 # calculate mph from rpm. based on wheel diameter
                 self.mph = self.rpm * math.pi * self.diameter / 1056
-                
+
                 if useQueue:
                     queue_reference.put(int(self.rpm))
-                    
+
                 self.text_file.write( str(self.curTime) + "," + str(self.rpm) + "\n" )
                 self.text_file.flush()
-                
+
                 self.endTime = timer() - self.initTime
-                
+
                 GPIO.output( self.ledPin, GPIO.LOW )
-                
+
             elif self.input_hallSen == self.isHallSenWithBoard and self.hallFlag == 1:
                 self.filler = 0
-                
+
             else:
                 self.hallFlag = 0
-                
+
             time.sleep(0.00005)			#could be wrong, but also tried 0.0005 and seemed to work
-            
+
         self.text_file.write( str(timer() - self.initTime) )
         self.text_file.was( "END OF DATA" )
         self.text_file.flush()
         self.text_file.close()
-        
+
     def setFlag(self, flag):
         self.runningFlag = flag
-        
+
 
 class SevenSegThread():
     def __init__(self, threadID, name):
         print("Initializing Seven Segment Display.")
-        
+
         self.ON  = 0
         self.OFF = 1
-        
+
         self.segments = [7,21,13,23,15,18,31,32]
         self.digits   = [33,29,22,16]
-        
+
         self.threadID = threadID
         self.name     = name
-        
+
         #					  e	        d		  dp        c	      g	        b	      f	        a
         self.numbers = { ' ':[self.OFF, self.OFF, self.OFF, self.OFF, self.OFF, self.OFF, self.OFF, self.OFF],
                          '0':[self.ON , self.ON , self.OFF, self.ON , self.OFF, self.ON , self.ON , self.ON ],
@@ -202,32 +213,32 @@ class SevenSegThread():
 
         self.buffer = 0
         self.length = 0
-        
+
         self. inputStr = str( int(self.buffer) )
-        
+
         self.length  = len( self.inputStr )
         self.display = [0] * self.length
         self.actualDigits = [0] * self.length
-        
+
         for i in range (0, self.length):
             self.display[i] = self.inputStr[i]
-            
+
         self.k = 3
         for i in range(self.length -1, -1, -1):
             self.actualDigits[i] = self.digits[self.k]
             self.k -= 1
-            
+
         print("Seven Seg SetUp Done.\n")
-        
+
     def run(self, q):
-    
+
         global baja_string
         global clear_character
         global speedNumber
-        
+
         prevNum = 0
         stTime = timer()
-    
+
         while True:
             # check if something is in the queue
             if not q.empty():
@@ -270,7 +281,7 @@ class SevenSegThread():
             i = 0
             for dig in self.actualDigits:
                 charCode = self.numbers[self.display[i]]
-                
+
                 j = 0
                 for val in charCode:
                     GPIO.output( self.segments[j], val )
@@ -281,11 +292,12 @@ class SevenSegThread():
                 GPIO.output(dig, False)
 
                 i += 1
-        
+
 
 #########################
 
 def startDAQ():
+    # setup global variables
     global exitFlag
     global hallLedPins
 
@@ -296,15 +308,18 @@ def startDAQ():
     hall2Process_active = False
     strainGauge_active  = False
 
+    # hold leds for 3 seconds as start up indicator
     GPIO.output(led_1_pin_number, GPIO.HIGH)
     GPIO.output(led_2_pin_number, GPIO.HIGH)
     time.sleep(3)
     GPIO.output(led_1_pin_number, GPIO.LOW)
     GPIO.output(led_2_pin_number, GPIO.LOW)
 
+    # initialize queue to hold values going to seven segmend display
     queue = Queue()
     queue.put(baja_string)
 
+    # create seven segment display object.
     sev_seg_object  = SevenSegThread(3, "sevSeg")
     sev_seg_process = Process(target=sev_seg_object.run, args=(queue,))
     sev_seg_process.daemon = True
@@ -360,19 +375,19 @@ def startDAQ():
             switchFlag = 0
             queue.put(baja_string)
             print("\nSwitch Off.\n")
-            
+
             # End the Hallsensor threads
             hall1.setFlag(0)
             hall2.setFlag(0)
-            
+
             hall1Process.terminate()
             hall2Process.terminate()
-            
+
             hall1Process_active = False
             hall2Process_active = False
-            
+
             time.sleep(0.5)
-            
+
         # Strain Guage Execution
         if strain_input and not(strainGauge_active):
             localtime = time.asctime( time.localtime(time.time()))
@@ -383,44 +398,59 @@ def startDAQ():
             strainGauge_active = True
         elif not(strain_input) and strainGauge_active:
             strainGauge_active = False
-            
+
         time.sleep(1.0)
-        
+
     queue.close()
 
 ######################### General Functions
 
 def shutdown():
+    # call shell command to shutdown immediately
     call("sudo shutdown -h now", shell=True)
 
 ######################### MAIN
 
-print("Waiting for Missile Switch")
-
+# read switch positions
 missile_input = GPIO.input(missile_switch_pin_number)
 strain_input  = GPIO.input(strain_gauge_pin_number)
 hall_input    = GPIO.input(hall_sensor_pin_number)
 
-while not(strain_input and hall_input):
-    print('hall and strain off')
+# check if toggles are in shutdown position
+# wait until the position changes so the pi doesn't automatically shut down
+message_flag = True
+while strain_input and hall_input and missile_input:
+    if message_flag:
+        # only print message once
+        print('Toggles in shutdown position.\nWaiting for change.')
+        message_flag = False
+
+    # continue reading switch positions
+    missile_input = GPIO.input(missile_switch_pin_number)
     strain_input  = GPIO.input(strain_gauge_pin_number)
     hall_input    = GPIO.input(hall_sensor_pin_number)
     sleep(1)
-    print('restarting check for strain and hall')
 
 while True:
-    print('holding')
+    print('Entering Standby.')
+
+    # read switch positions
     missile_input = GPIO.input(missile_switch_pin_number)
     strain_input  = GPIO.input(strain_gauge_pin_number)
     hall_input    = GPIO.input(hall_sensor_pin_number)
 
+    # if missile switch is put down, start collection mode
     if not(missile_input):
-        print('starting data aq')
-        startDAQ()																	### START ******
+        print('Entering Collection Mode.')
+        startDAQ()
 
+    # if toggles are in shutdown position, start shutdown sequence
     elif missile_input and hall_input and strain_input:
-        print('shutdown?')
+        # initialize 5 second timer
         startTime = Timer
+
+        # flag == 0 - cancel shutdown - default state for safety
+        # flag == 1 - shutdown
         flag = 0
 
         print("Shutting down in 5 seconds. Toggle any switch to cancel.")
@@ -430,16 +460,21 @@ while True:
             missile_input = GPIO.input(missile_switch_pin_number)
             strain_input  = GPIO.input(strain_gauge_pin_number)
 
+            # if a switch position is changed, cancel shutdown
             if not(missile_input) or not(hall_input) or not(strain_input):
                 flag = 0
-                print("Cancelling ShutDown.")
+                print("Cancelling shutdown.")
+
+                # break from shutdown check loop
                 break
-            sleep(0.05)
+            sleep(0.1)
             flag = 1
 
+        # if flag remained 1 above, shutdown pi by breaking out of main loop
         if flag == 1:
             break
 
+    # blink leds in standby mode
     GPIO.output(led_1_pin_number, GPIO.LOW)
     GPIO.output(led_2_pin_number, GPIO.HIGH)
     sleep(0.25)
@@ -447,4 +482,5 @@ while True:
     GPIO.output(led_2_pin_number, GPIO.LOW)
     sleep(0.25)
 
+# if main loop is exitted, shutdown the pi
 shutdown()

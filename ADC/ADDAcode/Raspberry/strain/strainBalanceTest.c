@@ -1,25 +1,25 @@
 /*
- * ADS1256_test.c:
+ * AD-DA_test.c:
  *	Very simple program to test the serial port. Expects
  *	the port to be looped back to itself
  *
  */
 
 /*
-             define from bcm2835.h                       define from Board DVK511
-                 3.3V | | 5V               ->                 3.3V | | 5V
-    RPI_V2_GPIO_P1_03 | | 5V               ->                  SDA | | 5V
-    RPI_V2_GPIO_P1_05 | | GND              ->                  SCL | | GND
-       RPI_GPIO_P1_07 | | RPI_GPIO_P1_08   ->                  IO7 | | TX
-                  GND | | RPI_GPIO_P1_10   ->                  GND | | RX
-       RPI_GPIO_P1_11 | | RPI_GPIO_P1_12   ->                  IO0 | | IO1
-    RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
-       RPI_GPIO_P1_15 | | RPI_GPIO_P1_16   ->                  IO3 | | IO4
-                  VCC | | RPI_GPIO_P1_18   ->                  VCC | | IO5
-       RPI_GPIO_P1_19 | | GND              ->                 MOSI | | GND
-       RPI_GPIO_P1_21 | | RPI_GPIO_P1_22   ->                 MISO | | IO6
-       RPI_GPIO_P1_23 | | RPI_GPIO_P1_24   ->                  SCK | | CE0
-                  GND | | RPI_GPIO_P1_26   ->                  GND | | CE1
+			 define from bcm2835.h                       define from Board DVK511
+				 3.3V | | 5V               ->                 3.3V | | 5V
+	RPI_V2_GPIO_P1_03 | | 5V               ->                  SDA | | 5V
+	RPI_V2_GPIO_P1_05 | | GND              ->                  SCL | | GND
+	   RPI_GPIO_P1_07 | | RPI_GPIO_P1_08   ->                  IO7 | | TX
+				  GND | | RPI_GPIO_P1_10   ->                  GND | | RX
+	   RPI_GPIO_P1_11 | | RPI_GPIO_P1_12   ->                  IO0 | | IO1
+	RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
+	   RPI_GPIO_P1_15 | | RPI_GPIO_P1_16   ->                  IO3 | | IO4
+				  VCC | | RPI_GPIO_P1_18   ->                  VCC | | IO5
+	   RPI_GPIO_P1_19 | | GND              ->                 MOSI | | GND
+	   RPI_GPIO_P1_21 | | RPI_GPIO_P1_22   ->                 MISO | | IO6
+	   RPI_GPIO_P1_23 | | RPI_GPIO_P1_24   ->                  SCK | | CE0
+				  GND | | RPI_GPIO_P1_26   ->                  GND | | CE1
 
 ::if your raspberry Pi is version 1 or rev 1 or rev A
 RPI_V2_GPIO_P1_03->RPI_GPIO_P1_03
@@ -34,7 +34,7 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-#include <time.h>
+
 
 //CS      -----   SPICS
 //DIN     -----   MOSI
@@ -47,14 +47,17 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 
 #define  DRDY  RPI_GPIO_P1_11         //P0
 #define  RST  RPI_GPIO_P1_12     //P1
-#define	SPICS	RPI_GPIO_P1_15	//P3
-#define TOGGLE RPI_V2_GPIO_P1_05
+#define	SPICS	RPI_GPIO_P1_15	//P3   ads1256  cs
+#define	SPICS1	RPI_GPIO_P1_16	//P4   DAC8552 CS
 
 #define CS_1() bcm2835_gpio_write(SPICS,HIGH)
 #define CS_0()  bcm2835_gpio_write(SPICS,LOW)
 
+#define CS1_1() bcm2835_gpio_write(SPICS1,HIGH)
+#define CS1_0()  bcm2835_gpio_write(SPICS1,LOW)
+
+
 #define DRDY_IS_LOW()	((bcm2835_gpio_lev(DRDY)==0))
-#define TOGGLE_IS_OFF()  ((bcm2835_gpio_lev(TOGGLE)==0))
 
 #define RST_1() 	bcm2835_gpio_write(RST,HIGH);
 #define RST_0() 	bcm2835_gpio_write(RST,LOW);
@@ -68,11 +71,14 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 
 
 
+#define channel_A   0x30
+#define channel_B   0x34
+
 
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 
 
-/* gain channelî */
+/* gain channel� */
 typedef enum
 {
 	ADS1256_GAIN_1			= (0),	/* GAIN   1 */
@@ -133,12 +139,12 @@ typedef struct
 	ADS1256_DRATE_E DataRate;	/* DATA output  speed*/
 	int32_t AdcNow[8];			/* ADC  Conversion value */
 	uint8_t Channel;			/* The current channel*/
-	uint8_t ScanMode;	/*Scanning mode,   0  Single-ended input  8 channel£¬ 1 Differential input  4 channel*/
+	uint8_t ScanMode;	/*Scanning mode,   0  Single-ended input  8 channel�� 1 Differential input  4 channel*/
 }ADS1256_VAR_T;
 
 
 
-/*Register definition£º Table 23. Register Map --- ADS1256 datasheet Page 30*/
+/*Register definition�� Table 23. Register Map --- ADS1256 datasheet Page 30*/
 enum
 {
 	/*Register address, followed by reset the default values */
@@ -155,7 +161,7 @@ enum
 	REG_FSC2   = 10, // xxH
 };
 
-/* Command definition£º TTable 24. Command Definitions --- ADS1256 datasheet Page 34 */
+/* Command definition�� TTable 24. Command Definitions --- ADS1256 datasheet Page 34 */
 enum
 {
 	CMD_WAKEUP  = 0x00,	// Completes SYNC and Exits Standby Mode 0000  0000 (00h)
@@ -200,8 +206,6 @@ static const uint8_t s_tabDataRate[ADS1256_DRATE_MAX] =
 
 
 
-
-
 void  bsp_DelayUS(uint64_t micros);
 void ADS1256_StartScan(uint8_t _ucScanMode);
 static void ADS1256_Send8Bit(uint8_t _data);
@@ -222,6 +226,12 @@ void ADS1256_ISR(void);
 uint8_t ADS1256_Scan(void);
 
 
+/***************************************************/
+void Write_DAC8552(uint8_t channel, uint16_t Data);
+uint16_t Voltage_Convert(float Vref, float voltage);
+
+
+
 
 
 void  bsp_DelayUS(uint64_t micros)
@@ -229,11 +239,10 @@ void  bsp_DelayUS(uint64_t micros)
 		bcm2835_delayMicroseconds (micros);
 }
 
-
 /*
 *********************************************************************************************************
 *	name: bsp_InitADS1256
-*	function: Configuration of the STM32 GPIO and SPI interface£¬The connection ADS1256
+*	function: Configuration of the STM32 GPIO and SPI interface��The connection ADS1256
 *	parameter: NULL
 *	The return value: NULL
 *********************************************************************************************************
@@ -248,7 +257,7 @@ void bsp_InitADS1256(void)
 	DI_0();
 #endif
 
-//ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_1000SPS);	/* ÅäÖÃADC²ÎÊý£º ÔöÒæ1:1, ÊýŸÝÊä³öËÙÂÊ 1KHz */
+//ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_1000SPS);	/* ����ADC������ ����1:1, ������������ 1KHz */
 }
 
 
@@ -258,14 +267,14 @@ void bsp_InitADS1256(void)
 *********************************************************************************************************
 *	name: ADS1256_StartScan
 *	function: Configuration DRDY PIN for external interrupt is triggered
-*	parameter: _ucDiffMode : 0  Single-ended input  8 channel£¬ 1 Differential input  4 channe
+*	parameter: _ucDiffMode : 0  Single-ended input  8 channel�� 1 Differential input  4 channe
 *	The return value: NULL
 *********************************************************************************************************
 */
 void ADS1256_StartScan(uint8_t _ucScanMode)
 {
 	g_tADS1256.ScanMode = _ucScanMode;
-	/* ¿ªÊŒÉšÃèÇ°, ÇåÁãœá¹û»º³åÇø */
+	/* ��ʼɨ��ǰ, �������������� */
 	{
 		uint8_t i;
 
@@ -339,9 +348,9 @@ void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 			ACAL=1  enable  calibration
 		*/
 		//buf[0] = (0 << 3) | (1 << 2) | (1 << 1);//enable the internal buffer
-        buf[0] = (0 << 3) | (1 << 2) | (0 << 1);  // The internal buffer is prohibited
+		buf[0] = (0 << 3) | (1 << 2) | (0 << 1);  // The internal buffer is prohibited
 
-        //ADS1256_WriteReg(REG_STATUS, (0 << 3) | (1 << 2) | (1 << 1));
+		//ADS1256_WriteReg(REG_STATUS, (0 << 3) | (1 << 2) | (1 << 1));
 
 		buf[1] = 0x08;
 
@@ -356,9 +365,9 @@ void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 
 			Bits 4-3 SDCS1, SCDS0: Sensor Detect Current Sources
 				00 = Sensor Detect OFF (default)
-				01 = Sensor Detect Current = 0.5 ŠÌ A
-				10 = Sensor Detect Current = 2 ŠÌ A
-				11 = Sensor Detect Current = 10ŠÌ A
+				01 = Sensor Detect Current = 0.5 �� A
+				10 = Sensor Detect Current = 2 �� A
+				11 = Sensor Detect Current = 10�� A
 				The Sensor Detect Current Sources can be activated to verify  the integrity of an external sensor supplying a signal to the
 				ADS1255/6. A shorted sensor produces a very small signal while an open-circuit sensor produces a very large signal.
 
@@ -376,7 +385,7 @@ void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 		//ADS1256_WriteReg(REG_ADCON, (0 << 5) | (0 << 2) | (GAIN_1 << 1));	/*choose 1: gain 1 ;input 5V/
 		buf[3] = s_tabDataRate[_drate];	// DRATE_10SPS;
 
-		CS_0();	/* SPIÆ¬Ñ¡ = 0 */
+		CS_0();	/* SPIƬѡ = 0 */
 		ADS1256_Send8Bit(CMD_WREG | 0);	/* Write command register, send the register address */
 		ADS1256_Send8Bit(0x03);			/* Register number 4,Initialize the number  -1*/
 
@@ -522,7 +531,7 @@ static void ADS1256_SetChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ��don��t care��)
 
 		NOTE: When using an ADS1255 make sure to only select the available inputs.
 
@@ -535,7 +544,7 @@ static void ADS1256_SetChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ��don��t care��)
 	*/
 	if (_ch > 7)
 	{
@@ -564,7 +573,7 @@ static void ADS1256_SetDiffChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ��don��t care��)
 
 		NOTE: When using an ADS1255 make sure to only select the available inputs.
 
@@ -577,23 +586,23 @@ static void ADS1256_SetDiffChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ��don��t care��)
 	*/
 	if (_ch == 0)
 	{
-		ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);	/* DiffChannal  AIN0£¬ AIN1 */
+		ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);	/* DiffChannal  AIN0�� AIN1 */
 	}
 	else if (_ch == 1)
 	{
-		ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);	/*DiffChannal   AIN2£¬ AIN3 */
+		ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);	/*DiffChannal   AIN2�� AIN3 */
 	}
 	else if (_ch == 2)
 	{
-		ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);	/*DiffChannal    AIN4£¬ AIN5 */
+		ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);	/*DiffChannal    AIN4�� AIN5 */
 	}
 	else if (_ch == 3)
 	{
-		ADS1256_WriteReg(REG_MUX, (6 << 4) | 7);	/*DiffChannal   AIN6£¬ AIN7 */
+		ADS1256_WriteReg(REG_MUX, (6 << 4) | 7);	/*DiffChannal   AIN6�� AIN7 */
 	}
 }
 
@@ -633,7 +642,7 @@ static void ADS1256_WaitDRDY(void)
 static int32_t ADS1256_ReadData(void)
 {
 	uint32_t read = 0;
-    static uint8_t buf[3];
+	static uint8_t buf[3];
 
 	CS_0();	/* SPI   cs = 0 */
 
@@ -642,21 +651,21 @@ static int32_t ADS1256_ReadData(void)
 	ADS1256_DelayDATA();	/*delay time  */
 
 	/*Read the sample results 24bit*/
-    buf[0] = ADS1256_Recive8Bit();
-    buf[1] = ADS1256_Recive8Bit();
-    buf[2] = ADS1256_Recive8Bit();
+	buf[0] = ADS1256_Recive8Bit();
+	buf[1] = ADS1256_Recive8Bit();
+	buf[2] = ADS1256_Recive8Bit();
 
-    read = ((uint32_t)buf[0] << 16) & 0x00FF0000;
-    read |= ((uint32_t)buf[1] << 8);  /* Pay attention to It is wrong   read |= (buf[1] << 8) */
-    read |= buf[2];
+	read = ((uint32_t)buf[0] << 16) & 0x00FF0000;
+	read |= ((uint32_t)buf[1] << 8);  /* Pay attention to It is wrong   read |= (buf[1] << 8) */
+	read |= buf[2];
 
-	CS_1();	/* SPIÆ¬Ñ¡ = 1 */
+	CS_1();	/* SPIƬѡ = 1 */
 
 	/* Extend a signed number*/
-    if (read & 0x800000)
-    {
-	    read |= 0xFF000000;
-    }
+	if (read & 0x800000)
+	{
+		read |= 0xFF000000;
+	}
 
 	return (int32_t)read;
 }
@@ -694,7 +703,7 @@ int32_t ADS1256_GetAdc(uint8_t _ch)
 */
 void ADS1256_ISR(void)
 {
-	if (g_tADS1256.ScanMode == 0)	/*  0  Single-ended input  8 channel£¬ 1 Differential input  4 channe */
+	if (g_tADS1256.ScanMode == 0)	/*  0  Single-ended input  8 channel�� 1 Differential input  4 channe */
 	{
 
 		ADS1256_SetChannal(g_tADS1256.Channel);	/*Switch channel mode */
@@ -766,16 +775,6 @@ uint8_t ADS1256_Scan(void)
 
 	return 0;
 }
-
-uint8_t Toggle_Scan(void)
-{
-	if(TOGGLE_IS_OFF())
-	{
-		return 1;
-	}
-	return 0;
-}
-
 /*
 *********************************************************************************************************
 *	name: Write_DAC8552
@@ -789,12 +788,12 @@ void Write_DAC8552(uint8_t channel, uint16_t Data)
 {
 	uint8_t i;
 
-	 CS_1() ;
-	 CS_0() ;
-      bcm2835_spi_transfer(channel);
-      bcm2835_spi_transfer((Data>>8));
-      bcm2835_spi_transfer((Data&0xff));
-      CS_1() ;
+	 CS1_1() ;
+	 CS1_0() ;
+	  bcm2835_spi_transfer(channel);
+	  bcm2835_spi_transfer((Data>>8));
+	  bcm2835_spi_transfer((Data&0xff));
+	  CS1_1() ;
 }
 /*
 *********************************************************************************************************
@@ -822,35 +821,52 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 *********************************************************************************************************
 */
 
-int  main(int argc, char **argv)
+int  main()
 {
-      uint8_t id;
-  	int32_t adc[8];
-	int32_t volt[8];
-	uint8_t i;
-	uint8_t ch_num;
-	int32_t iTemp;
-	uint8_t buf[3];
-    if (!bcm2835_init())
-        return 1;
-    bcm2835_spi_begin();
-    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_LSBFIRST );      // The default
-    bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                   // The default
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_1024); // The default
-    bcm2835_gpio_fsel(SPICS, BCM2835_GPIO_FSEL_OUTP);//
-    bcm2835_gpio_write(SPICS, HIGH);
-    bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
-    bcm2835_gpio_fsel(TOGGLE, BCM2835_GPIO_FSEL_INPT);
-    bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
-    bcm2835_gpio_set_pud(TOGGLE, BCM2835_GPIO_PUD_UP);
+	uint8_t id; // holds chip id
+	bool isDifferential = 1; // 0 - single-ended; 1 - differential
+	uint8_t i; // counter variable
+	uint8_t ch_num; // number of channels to read
+	int32_t iTemp; // temporary variable for voltage value manipulation
+	int32_t balance; // used for balancing wheatstone bridge circuits
+	uint16_t balanceCount = 50; // number of samples to average for balancing
 
-    //ADS1256_WriteReg(REG_MUX,0x01);
-    //ADS1256_WriteReg(REG_ADCON,0x20);
-   // ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
-   id = ADS1256_ReadChipID();
-   printf("\r\n");
-   printf("ID=\r\n");
-	if (id != 3)
+	// check if bcm2835 library initializes properly
+	// also serves to run bcm2835_init()
+	if (!bcm2835_init()) {
+		// if library does not initialize, end program
+		return 1;
+	}
+
+	// begin spi
+	bcm2835_spi_begin();
+
+	// set serial bit order
+	// LSBFIRST - rightmost first (default)
+	// MSBFIRST - leftmost first
+	bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_LSBFIRST);
+
+	// set clock polarity (CPOL) and clock phase (CPHA)
+	// default is SPI_MODE1 - CPOL = 0, CPHA = 1
+	bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);
+
+	// set spi clock speed
+	// default - 8192 or 48kHz on RPi3
+	bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_8192);
+
+	// set pin modes
+	bcm2835_gpio_fsel(SPICS, BCM2835_GPIO_FSEL_OUTP);//
+	bcm2835_gpio_write(SPICS, HIGH);
+	bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
+	bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
+
+	// get chip id
+	id = ADS1256_ReadChipID();
+
+	// print chip id status
+	printf("\r\n");
+	printf("ID=\r\n");
+		if (id != 3)
 	{
 		printf("Error, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
@@ -859,130 +875,68 @@ int  main(int argc, char **argv)
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
 
-	//fflush(stdout);
+	// setup single or differential channel reading
+	if (isDifferential) {
+		int32_t adc[4];
+		int32_t volt[4];
+		ch_num = 4;
+	} else {
+		int32_t adc[8];
+		int32_t volt[8];
+		ch_num = 8;
+	}
 
-	time_t now = time(0);
+	// setup ADC gain and sampling rate
+	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_500SPS);
+	ADS1256_StartScan(isDifferential);
 
-	char* dt = ctime(&now);
+	balance = 0;
 
-	//char buffer[150];
-
-	printf("before strs\r\n");
-
-	char str[100];
-
-	//char *str1 = "/home/pi/Desktop/daq/DanielH/data/StrainGauge/ADC_Data";
-	//char *str2 = argv[1];
-	//char *str3 = ".txt";
-
-	//printf("after strs\r\n");
-
-	//printf("%s\r\n", str);
-	//printf("%s\r\n", str1);
-	//printf("%s\r\n", str2);
-	//printf("%s\r\n", str3);
-
-	strcpy(str, "/home/pi/Desktop/data/StrainGauge/strainTest");
-	strcat(str, argv[1]); // needs to be the current timestamp
-	strcat(str, ".txt");
-
-	printf("%s\r\n", str);
-
-    //strftime(buffer, 150, "/home/pi/Desktop/daq/DanielH/data/StrainGauge/ADC_Data.txt");
-	printf("1\r\n");
-	//FILE *data = fopen("/home/pi/Desktop/daq/DanielH/data/StrainGauge/ADC_Data.txt", "w");
-	printf("2\r\n");
-
-	FILE *data = fopen(str, "w");
-
-	//Toggle_Scan();
-	//fflush(stdout);
-  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_30000SPS);
-    ADS1256_StartScan(1);
-    ch_num = 1;
-    clock_t t1, t2;
-
-	printf("strain started\r\n");
-	// fprintf(data, "Start of Data\n");
-	//fflush(stdout);
-	while(1)
-	{
-		// may be prone to infinite loop if nothing is there
-
-
-		fflush(data);
-		if(Toggle_Scan() == 1)
-		{
-			break;
-		}
+	while(1) {
 
 		while((ADS1256_Scan() == 0));
 
-		for (i = 0; i < 1; i++)
-		{
-			adc[i] = ADS1256_GetAdc(i);
-			volt[i] = (adc[i] * 100) / 167;
-		}
-
-		// printf("difference: ");
-		iTemp = volt[0];	// uV
-
-		if (iTemp < 0)
-		{
-			iTemp = -iTemp;
-			//printf("-%ld uV\r\n", iTemp);
-			fprintf(data, "-%ld, uV\n", iTemp);
-			fflush(data);
-		}
-		else
-		{
-			//printf("%ld uV\r\n", iTemp);
-			fprintf(data, "%ld, uV\n", iTemp);
-			fflush(data);
-		}
-
-	/*
-		while((ADS1256_Scan() == 0));
-
+		if (balanceCount < count) {
+			balance += ADS1256_GetAdc(0);
+			// printf("%d\n", balance);
+			balanceCount++;
+		} else if (balanceCount == count) {
+			balance /= balanceCount;
+			// printf("%d\n", balance);
+		} else {
 		for (i = 0; i < ch_num; i++)
 		{
-			adc[i] = ADS1256_GetAdc(i);
-              	 volt[i] = (adc[i] * 100) / 167;
+			adc[i] = ADS1256_GetAdc(i) - balance;
+				 volt[i] = (adc[i] * 100) / 167;
 		}
 
 		for (i = 0; i < ch_num; i++)
 		{
-	                buf[0] = ((uint32_t)adc[i] >> 16) & 0xFF;
-	                buf[1] = ((uint32_t)adc[i] >> 8) & 0xFF;
-	                buf[2] = ((uint32_t)adc[i] >> 0) & 0xFF;
-	                printf("%d=%02X%02X%02X, %8ld", (int)i, (int)buf[0],
-	                       (int)buf[1], (int)buf[2], (long)adc[i]);
+					buf[0] = ((uint32_t)adc[i] >> 16) & 0xFF;
+					buf[1] = ((uint32_t)adc[i] >> 8) & 0xFF;
+					buf[2] = ((uint32_t)adc[i] >> 0) & 0xFF;
+					printf("%d=%02X%02X%02X, %8ld", (int)i, (int)buf[0],
+						   (int)buf[1], (int)buf[2], (long)adc[i]);
 
-	                iTemp = volt[i];	// uV
+					iTemp = volt[i];	/* uV  */
 					if (iTemp < 0)
 					{
 						iTemp = -iTemp;
-	                  		  	printf(" (-%ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
+								printf(" (-%ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
 					}
 					else
 					{
-	                    			printf(" ( %ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
+									printf(" ( %ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
 					}
 
 		}
-		printf("\33[%dA", (int)ch_num);
-		*/
-		//bsp_DelayUS(100000);
-
-		// printf("\33[%dA", 1);
-		//bsp_DelayUS(100);
+			printf("\33[%dA", (int)ch_num);
+		// bsp_DelayUS(5);
 	}
-	fprintf(data, "End of Data\n");
-	fflush(data);
-	fclose(data);
-    bcm2835_spi_end();
-    bcm2835_close();
+			}
+   //while(1);
+	bcm2835_spi_end();
+	bcm2835_close();
 
-
-    return 0;
+	return 0;
 }

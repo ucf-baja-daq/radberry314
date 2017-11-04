@@ -865,9 +865,9 @@ int  main()
 	#endif
 */
 
-	ADS1256_CfgADC(ADS1256_GAIN_64, ADS1256_1000SPS);
+	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
        ADS1256_StartScan(1);
-	ch_num = 1;
+	ch_num = 4;
 	//if (ADS1256_Scan() == 0)
 		//{
 			//continue;
@@ -903,7 +903,7 @@ int  main()
 					}
 
 		}
-			printf("\33[%dA", (int)ch_num);
+		printf("\33[%dA", (int)ch_num);
 		bsp_DelayUS(100000);
 			}
    //while(1);

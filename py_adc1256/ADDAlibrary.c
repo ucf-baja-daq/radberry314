@@ -6,20 +6,20 @@
  */
 
 /*
-			 define from bcm2835.h                       define from Board DVK511
-				 3.3V | | 5V               ->                 3.3V | | 5V
-	RPI_V2_GPIO_P1_03 | | 5V               ->                  SDA | | 5V
-	RPI_V2_GPIO_P1_05 | | GND              ->                  SCL | | GND
-	   RPI_GPIO_P1_07 | | RPI_GPIO_P1_08   ->                  IO7 | | TX
-				  GND | | RPI_GPIO_P1_10   ->                  GND | | RX
-	   RPI_GPIO_P1_11 | | RPI_GPIO_P1_12   ->                  IO0 | | IO1
-	RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
-	   RPI_GPIO_P1_15 | | RPI_GPIO_P1_16   ->                  IO3 | | IO4
-				  VCC | | RPI_GPIO_P1_18   ->                  VCC | | IO5
-	   RPI_GPIO_P1_19 | | GND              ->                 MOSI | | GND
-	   RPI_GPIO_P1_21 | | RPI_GPIO_P1_22   ->                 MISO | | IO6
-	   RPI_GPIO_P1_23 | | RPI_GPIO_P1_24   ->                  SCK | | CE0
-				  GND | | RPI_GPIO_P1_26   ->                  GND | | CE1
+             define from bcm2835.h                       define from Board DVK511
+                 3.3V | | 5V               ->                 3.3V | | 5V
+    RPI_V2_GPIO_P1_03 | | 5V               ->                  SDA | | 5V
+    RPI_V2_GPIO_P1_05 | | GND              ->                  SCL | | GND
+       RPI_GPIO_P1_07 | | RPI_GPIO_P1_08   ->                  IO7 | | TX
+                  GND | | RPI_GPIO_P1_10   ->                  GND | | RX
+       RPI_GPIO_P1_11 | | RPI_GPIO_P1_12   ->                  IO0 | | IO1
+    RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
+       RPI_GPIO_P1_15 | | RPI_GPIO_P1_16   ->                  IO3 | | IO4
+                  VCC | | RPI_GPIO_P1_18   ->                  VCC | | IO5
+       RPI_GPIO_P1_19 | | GND              ->                 MOSI | | GND
+       RPI_GPIO_P1_21 | | RPI_GPIO_P1_22   ->                 MISO | | IO6
+       RPI_GPIO_P1_23 | | RPI_GPIO_P1_24   ->                  SCK | | CE0
+                  GND | | RPI_GPIO_P1_26   ->                  GND | | CE1
 
 ::if your raspberry Pi is version 1 or rev 1 or rev A
 RPI_V2_GPIO_P1_03->RPI_GPIO_P1_03
@@ -348,9 +348,9 @@ void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 			ACAL=1  enable  calibration
 		*/
 		//buf[0] = (0 << 3) | (1 << 2) | (1 << 1);//enable the internal buffer
-		buf[0] = (0 << 3) | (1 << 2) | (0 << 1);  // The internal buffer is prohibited
+        buf[0] = (0 << 3) | (1 << 2) | (0 << 1);  // The internal buffer is prohibited
 
-		//ADS1256_WriteReg(REG_STATUS, (0 << 3) | (1 << 2) | (1 << 1));
+        //ADS1256_WriteReg(REG_STATUS, (0 << 3) | (1 << 2) | (1 << 1));
 
 		buf[1] = 0x08;
 
@@ -642,7 +642,7 @@ static void ADS1256_WaitDRDY(void)
 static int32_t ADS1256_ReadData(void)
 {
 	uint32_t read = 0;
-	static uint8_t buf[3];
+    static uint8_t buf[3];
 
 	CS_0();	/* SPI   cs = 0 */
 
@@ -651,21 +651,21 @@ static int32_t ADS1256_ReadData(void)
 	ADS1256_DelayDATA();	/*delay time  */
 
 	/*Read the sample results 24bit*/
-	buf[0] = ADS1256_Recive8Bit();
-	buf[1] = ADS1256_Recive8Bit();
-	buf[2] = ADS1256_Recive8Bit();
+    buf[0] = ADS1256_Recive8Bit();
+    buf[1] = ADS1256_Recive8Bit();
+    buf[2] = ADS1256_Recive8Bit();
 
-	read = ((uint32_t)buf[0] << 16) & 0x00FF0000;
-	read |= ((uint32_t)buf[1] << 8);  /* Pay attention to It is wrong   read |= (buf[1] << 8) */
-	read |= buf[2];
+    read = ((uint32_t)buf[0] << 16) & 0x00FF0000;
+    read |= ((uint32_t)buf[1] << 8);  /* Pay attention to It is wrong   read |= (buf[1] << 8) */
+    read |= buf[2];
 
 	CS_1();	/* SPIƬѡ = 1 */
 
 	/* Extend a signed number*/
-	if (read & 0x800000)
-	{
-		read |= 0xFF000000;
-	}
+    if (read & 0x800000)
+    {
+	    read |= 0xFF000000;
+    }
 
 	return (int32_t)read;
 }
@@ -790,10 +790,10 @@ void Write_DAC8552(uint8_t channel, uint16_t Data)
 
 	 CS1_1() ;
 	 CS1_0() ;
-	  bcm2835_spi_transfer(channel);
-	  bcm2835_spi_transfer((Data>>8));
-	  bcm2835_spi_transfer((Data&0xff));
-	  CS1_1() ;
+      bcm2835_spi_transfer(channel);
+      bcm2835_spi_transfer((Data>>8));
+      bcm2835_spi_transfer((Data&0xff));
+      CS1_1() ;
 }
 /*
 *********************************************************************************************************
@@ -812,6 +812,14 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 	return _D_;
 }
 
+int extendTest(int test_int) {
+	// verify argument
+	printf("%d\n", test_int);
+
+	// verify bcm library is loaded
+	return bcm2835_init();
+}
+
 /*
 *********************************************************************************************************
 *	name: main
@@ -823,25 +831,106 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 
 int  main()
 {
-	uint8_t id; // holds chip id
-	bool isDifferential = 1; // 0 - single-ended; 1 - differential
-	uint8_t i; // counter variable
-	uint8_t ch_num; // number of channels to read
-	int32_t iTemp; // temporary variable for voltage value manipulation
-	int32_t balance; // used for balancing wheatstone bridge circuits
-	uint16_t balanceCount = 50; // number of samples to average for balancing
+      uint8_t id;
+  	int32_t adc[8];
+	int32_t volt[8];
+	uint8_t i;
+	uint8_t ch_num;
+	int32_t iTemp;
 	uint8_t buf[3];
-
-	// setup single or differential channel reading
-	if (isDifferential) {
-		ch_num = 4;
-	} else {
-		ch_num = 8;
+    if (!bcm2835_init()) {
+        return 1;
 	}
+    bcm2835_spi_begin();
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_LSBFIRST );      // The default
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                   // The default
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_8192); // The default
+    bcm2835_gpio_fsel(SPICS, BCM2835_GPIO_FSEL_OUTP);//
+    bcm2835_gpio_write(SPICS, HIGH);
+    bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
+    bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
 
-	int32_t adc[ch_num];
-	int32_t volt[ch_num];
+   id = ADS1256_ReadChipID();
+   printf("\r\n");
+   printf("ID=\r\n");
+		if (id != 3)
+	{
+		printf("Error, ASD1256 Chip ID = 0x%d\r\n", (int)id);
+	}
+	else
+	{
+		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
+	}
+/*
+	#if 0
 
+		ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
+		ADS1256_StartScan(0);
+		ch_num = 8;
+	#else
+		ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
+		ch_num = 4;
+	#endif
+*/
+
+	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
+       ADS1256_StartScan(1);
+	ch_num = 4;
+	//if (ADS1256_Scan() == 0)
+		//{
+			//continue;
+		//}
+    // Write_DAC8552(0x30, Voltage_Convert(5.0,2.5));    	//Write channel A buffer (0x30)
+    // Write_DAC8552(0x34, Voltage_Convert(5.0,3.1));    	//Write channel B buffer (0x34)
+		while(1)
+	{
+	       while((ADS1256_Scan() == 0));
+		for (i = 0; i < ch_num; i++)
+		{
+			adc[i] = ADS1256_GetAdc(i);
+              	 volt[i] = (adc[i] * 100) / 167;
+		}
+
+		for (i = 0; i < ch_num; i++)
+		{
+	                buf[0] = ((uint32_t)adc[i] >> 16) & 0xFF;
+	                buf[1] = ((uint32_t)adc[i] >> 8) & 0xFF;
+	                buf[2] = ((uint32_t)adc[i] >> 0) & 0xFF;
+	                printf("%d=%02X%02X%02X, %8ld", (int)i, (int)buf[0],
+	                       (int)buf[1], (int)buf[2], (long)adc[i]);
+
+	                iTemp = volt[i];	/* uV  */
+					if (iTemp < 0)
+					{
+						iTemp = -iTemp;
+	                  		  	printf(" (-%ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
+					}
+					else
+					{
+	                    			printf(" ( %ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
+					}
+
+		}
+		printf("\33[%dA", (int)ch_num);
+		bsp_DelayUS(100000);
+			}
+   //while(1);
+    bcm2835_spi_end();
+    bcm2835_close();
+
+    return 0;
+}
+
+/*
+*********************************************************************************************************
+*	name: startADC
+*	function: Setup ads1256 chip
+*	parameter: gain:
+*	The return value:  NULL
+*********************************************************************************************************
+*/
+
+int startADC(int gain, int sampling_rate, int scan_mode) {
 	// check if bcm2835 library initializes properly
 	// also serves to run bcm2835_init()
 	if (!bcm2835_init()) {
@@ -887,66 +976,6 @@ int  main()
 	}
 
 	// setup ADC gain and sampling rate
-	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_500SPS);
-	ADS1256_StartScan(isDifferential);
-
-	for (i = 0; i < ch_num; i++)
-	{
-		ADS1256_GetAdc(i);
-	}
-
-
-	int test = 0;
-	test += ADS1256_GetAdc(0);
-	printf("%d\n", test);
-
-	// balance = 0;
-
-	// while(1) {
-		// ABSOLUTELY FUCKING VITAL ITS HOW THE CODE WAITS FOR THE INTERRUPT SIGNAL
-		// FROM THE ADS1256 CHIP TO UPDATE THE READ VALUES
-		while((ADS1256_Scan() == 0));
-
-		// if (balanceCount < count) {
-		// 	balance += ADS1256_GetAdc(0);
-		// 	// printf("%d\n", balance);
-		// 	balanceCount++;
-		// } else if (balanceCount == count) {
-		// 	balance /= balanceCount;
-		// 	// printf("%d\n", balance);
-		// } else {
-		for (i = 0; i < ch_num; i++)
-		{
-			adc[i] = ADS1256_GetAdc(i) - balance;
-				 volt[i] = (adc[i] * 100) / 167;
-		}
-
-		for (i = 0; i < ch_num; i++)
-		{
-					buf[0] = ((uint32_t)adc[i] >> 16) & 0xFF;
-					buf[1] = ((uint32_t)adc[i] >> 8) & 0xFF;
-					buf[2] = ((uint32_t)adc[i] >> 0) & 0xFF;
-					printf("%d=%02X%02X%02X, %8ld", (int)i, (int)buf[0],
-						   (int)buf[1], (int)buf[2], (long)adc[i]);
-
-					iTemp = volt[i];	/* uV  */
-					if (iTemp < 0)
-					{
-						iTemp = -iTemp;
-								printf(" (-%ld.%03ld %03ld V) \n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
-					}
-					else
-					{
-									printf(" ( %ld.%03ld %03ld V) \n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
-					}
-
-		}
-			printf("\33[%dA", (int)ch_num);
-		bsp_DelayUS(1000000);
-	// }
-	}
-	bcm2835_spi_end();
-	bcm2835_close();
-
-	return 0;
+	ADS1256_CfgADC(gain, sampling_rate);
+	ADS1256_StartScan(scan_mode);
 }

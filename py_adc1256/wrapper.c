@@ -1,103 +1,59 @@
 #include <Python.h>
 #include "wrapper.h"
 
-/* Docstrings */
-static char module_docstring[] = "This library is a wrapper.";
+// Docstrings
+static char module_docstring[] = "This is a python wrapper for the Waveshare AD-DA board.";
 
-/* Available functions */
-static PyObject *adc_read_channel(PyObject *self, PyObject *args);
-static PyObject *adc_read_all_channels(PyObject *self, PyObject *args);
-static PyObject *adc_start(PyObject *self, PyObject *args);
-static PyObject *adc_stop(PyObject *self, PyObject *args);
+// Functions
+static PyObject * extend_test(PyObject * self, PyObject * args) {
+	int * test_int;
+	int ret;
 
-/* Module specification */
+	if (!PyArg_ParseTuple(args, "I", &test_int)) {
+		return NULL;
+	}
+
+	ret = extendTest(test_int);
+	return PyLong_FromLong(ret);
+}
+
+static PyObject * start_adc(PyObject * self, PyObject * args);
+
+// Method specification
 static PyMethodDef module_methods[] = {
- //   {"ml_name", ml_meth, ml_flags, ml_doc},
-    {"read_channel", adc_read_channel, METH_VARARGS, {"Reads the specified ads1256 channel."}},
-    {"read_all_channels", adc_read_all_channels, METH_VARARGS, {"Reads all 8 ads1256 channels"}},
-    {"start", adc_start, METH_VARARGS, {"Start and configure the ads1256."}},
-    {"stop", adc_stop, 0, {"Stops the ads1256."}},
-    {NULL, NULL, 0, NULL}
+	{"extend_test", extend_test, METH_VARARGS, "Extension test"},
+	{"start_adc", start_adc, METH_VARARGS, "Set gain, sampling rate, and scan mode on ads1256 chip."},
+	{NULL}
 };
 
-/* Initialize the module */
-PyMODINIT_FUNC initads1256(void)
+// Module specification
+static struct PyModuleDef ads1256module = {
+    PyModuleDef_HEAD_INIT,
+    "ads1256",   /* name of module */
+    module_docstring, /* module documentation, may be NULL */
+    -1,       /* size of per-interpreter state of the module,
+                 or -1 if the module keeps state in global variables. */
+    module_methods
+};
+
+PyMODINIT_FUNC
+PyInit_ads1256(void)
 {
-    PyObject *m = Py_InitModule3("ads1256", module_methods, module_docstring);
-    if (m == NULL)
-        return;
-
-}
-static PyObject *adc_start(PyObject *self, PyObject *args)
-{
-
-    char * ganho, *sps;
-    PyObject *yerr_obj;
-    double v[8];
-    int value ;
-
-
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "ss", &ganho, &sps,&yerr_obj))
-        return NULL;
-
-    /* execute the code */
-    value = adcStart(4,"0",ganho,sps);
-
-    /* Build the output tuple */
-    PyObject *ret = Py_BuildValue("i",value);
-    return ret;
+    return PyModule_Create(&ads1256module);
 }
 
-static PyObject *adc_read_channel(PyObject *self, PyObject *args)
-{
+static PyObject * start_adc(PyObject * self, PyObject * args) {
+	int * gain, * sampling_rate, * scan_mode;
+	int returnValue;
 
-    int ch;
-    long int retorno;
-    PyObject *yerr_obj;
+	// parse arguments as long integers
+	if (!PyArg_ParseTuple(args, "I", &gain, &sampling_rate, &scan_mode)) {
+		return NULL;
+	}
 
+	// run startADC()
+	returnValue = startADC(gain, sampling_rate, scan_mode);
 
-
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "i", &ch,&yerr_obj))
-        return NULL;
-
-
-    /* execute the code */
-    retorno = readChannel(ch);
-    return Py_BuildValue("l",retorno);
-}
-
-
-static PyObject *adc_read_all_channels(PyObject *self, PyObject *args)
-{
-    PyObject *yerr_obj;
-    long int v[8];
-
-
-    /* execute the code */
-    readChannels(v);
-
-    /* Build the output tuple */
-    PyObject *ret = Py_BuildValue("[l,l,l,l,l,l,l,l]",
-	 v[0],
-	 v[1],
-	 v[2],
-	 v[3],
-	 v[4],
-	 v[5],
-	 v[6],
-	 v[7]
-     );
-    return ret;
-}
-
-static PyObject *adc_stop(PyObject *self, PyObject *args)
-{
-    /* execute the code */
-    int value = adcStop();
-
-    /* Build the output tuple */
-    PyObject *ret = Py_BuildValue("i",value);
-    return ret;
+	// dummy return for python object
+	return PyLong_FromLong(returnValue);
 }

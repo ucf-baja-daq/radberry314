@@ -905,6 +905,7 @@ int  main()
 	// while(1) {
 		// ABSOLUTELY FUCKING VITAL ITS HOW THE CODE WAITS FOR THE INTERRUPT SIGNAL
 		// FROM THE ADS1256 CHIP TO UPDATE THE READ VALUES
+		// checks until DRDY pin (normally high) is low. This indicates that a new sample is available.
 		while((ADS1256_Scan() == 0));
 
 		// if (balanceCount < count) {

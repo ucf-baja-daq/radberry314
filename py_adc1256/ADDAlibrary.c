@@ -812,14 +812,6 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 	return _D_;
 }
 
-int extendTest(int test_int) {
-	// verify argument
-	printf("%d\n", test_int);
-
-	// verify bcm library is loaded
-	return bcm2835_init();
-}
-
 /*
 *********************************************************************************************************
 *	name: startADC
@@ -885,4 +877,22 @@ int stop_ADC(void) {
     bcm2835_spi_end();
     bcm2835_close();
     return 0;
+}
+
+int collect_data(void) {
+	ADS1256_ISR();
+	return 0;
+}
+
+int read_channel_raw(int channel) {
+	long int adc = (long int) ADS1256_GetAdc(channel);
+	return adc;
+}
+
+double read_channel_volts(int channel) {
+	// 5 volts reference divided by 2^23
+	// 24 bits ranging from +5v to -5v
+	double volts = (double) ADS1256_GetAdc(channel) * 5 / 8388608;
+
+	return volts;
 }

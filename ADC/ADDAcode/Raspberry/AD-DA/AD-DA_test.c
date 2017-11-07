@@ -786,7 +786,6 @@ uint8_t ADS1256_Scan(void)
 */
 void Write_DAC8552(uint8_t channel, uint16_t Data)
 {
-	uint8_t i;
 
 	 CS1_1() ;
 	 CS1_0() ;

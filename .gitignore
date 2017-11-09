@@ -1,0 +1,4 @@
+io_examples/files
+*.pyc
+.vs
+.vscode

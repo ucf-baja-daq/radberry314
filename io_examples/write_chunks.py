@@ -5,6 +5,6 @@ import time
 from file_functs import write_chunks
 
 start = time.time()
-write_chunks(1000)
+write_chunks(3000)
 end = time.time()
 print('Files created in %d milliseconds' % ((end - start) * 1000))

@@ -12,7 +12,7 @@ class ChunkedFileIOQ:
 
     def _write(self):
         """Force a write to disk and flush buffer"""
-        with open(self.file_path, 'w') as file_out:
+        with open(self.file_path, 'a') as file_out:
             file_out.write(joinDataPoints(self.buf))
 
     def push(self, data_point):
@@ -67,12 +67,13 @@ def joinArrayToString(array, delimiter):
 def joinDataPoints(data_points):
     """
     Join items in an array into a string on a comma delimiter.
-    End new string with new line character
+    End new string with new line character.
+    Append ,\n to end of chunk.
     """
     print(data_points)
-    for row_index in range(0, len(data_points) - 1):
+    for row_index in range(0, len(data_points)):
         data_points[row_index] = joinArrayToString(
             data_points[row_index],
             ','
         )
-    return joinArrayToString(data_points, ',\n')
+    return joinArrayToString(data_points, ',\n') + ',\n'

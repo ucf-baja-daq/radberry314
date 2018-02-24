@@ -5,43 +5,66 @@
 import RPi.GPIO as GPIO
 from RPi.GPIO import OUT, IN, HIGH, LOW, BOARD
 from time import sleep
+import logging
+
+# setup log
+logging.basicConfig(format='%(levelname)s: %(message)s',level=logging.DEBUG)
 
 # Raspberry pi pin numbering setup
 GPIO.setwarnings(False)
 GPIO.setmode(BOARD)
 
-outLatchPin = 36
-outClockPin = 35
-outSerialPin = 37
+# LCD shift register pins
+lcdClock = 35
+lcdLatch = 36
+lcdData = 37
 
-inLatchPin = 32
-inClockPin = 33
-inSerialPin = 31
+# Shift in register pins
+inClock = 33
+inLatch = 32
+inData = 31
 
-GPIO.setup(outLatchPin, OUT)
-GPIO.setup(outClockPin, OUT)
-GPIO.setup(outSerialPin, OUT)
+# LED shift register pins
+ledClock = 7
+ledLatch = 8
+ledData = 10
 
-GPIO.setup(inLatchPin, OUT)
-GPIO.setup(inClockPin, OUT)
-GPIO.setup(inSerialPin, IN)
+# setup pins as input/output
+GPIO.setup(lcdClock, OUT)
+GPIO.setup(lcdLatch, OUT)
+GPIO.setup(lcdData, OUT)
+
+GPIO.setup(inClock, OUT)
+GPIO.setup(inLatch, OUT)
+GPIO.setup(inData, IN)
+
+GPIO.setup(ledClock, OUT)
+GPIO.setup(ledLatch, OUT)
+GPIO.setup(ledData, OUT)
 
 class ShiftOut():
-	def __init__(self, latchPin, clockPin, serialPin):
+	def __init__(self, latchPin, clockPin, serialPin, numOfRegisters):
 		self.latchPin = latchPin
 		self.clockPin = clockPin
 		self.serialPin = serialPin
+		self.numOfRegisters = numOfRegisters
+		self.register = 0;
+
+		# setup pin binary values
+		for i in range (8 * self.numOfRegisters):
+			self.pins[i] = 2 ^ i
 
 		# set all registers low
-		self.write(0)
+		self.writeOut()
 
-	def write(self, output):
+	def writeOut(self):
+		logging.debug("writing {:b} to register".format(self.register))
 		# create binary list from desired output
 		# bin() creates a number '0b101010' - need to read from 3rd digit for actual number
-		rawBits = [int(i) for i in bin(output)[2:]]
+		rawBits = [int(i) for i in bin(self.register)[2:]]
 
 		# make output most significant digit first
-		outBits = [0 for i in range(8)]
+		outBits = [0 for i in range(8 * self.numOfRegisters)]
 		for i in range(1, len(rawBits) + 1):
 			outBits[-i] = rawBits[-i]
 
@@ -66,17 +89,71 @@ class ShiftOut():
 		# set latch high to latch values to register
 		GPIO.output(self.latchPin, HIGH)
 
+	def set(self, index, value):
+		logging.debug("Setting register {} to {}".format(index + 1, value))
+		if value:
+			self.register |= self.pins[index]
+		else:
+			self.register &= ~self.pins[index]
+
+	def clear(self):
+		logging.debug("Setting all registers LOW.")
+		for i in range(8 * self.numOfRegisters):
+			self.setRegister(i, LOW)
+		self.writeOut()
+
+	def setAll(self):
+		logging.debug("Setting all registers HIGH.")
+		for i in range(8 * self.numOfRegisters):
+			self.setRegister(i, HIGH)
+		self.writeOut()
+
 
 class ShiftIn():
-	def __init__(self, latchPin, clockPin, serialPin):
+	def __init__(self, latchPin, clockPin, serialPin, numOfRegisters):
 		self.latchPin = latchPin
 		self.clockPin = clockPin
 		self.serialPin = serialPin
+		self.numOfRegisters = numOfRegisters
+		self.stateArray = None
+		self.state = 0
 
-		# set pins low as default
-		GPIO.output(self.latchPin, LOW)
-		GPIO.output(self.clockPin, LOW)
-		GPIO.output(self.serialPin, LOW)
+		# inactive state
+		GPIO.output(inLatch, LOW)
+		GPIO.output(inClock, HIGH)
 
 	def read(self):
-		pass
+		# pulse latch to begin reading
+		GPIO.output(inLatch, HIGH)
+		sleep(0.00002)
+		GPIO.output(inLatch, LOW)
+
+		# move from pin 8 to pin 1 on shift register
+		for i in range(numOfRegisters - 1, -1, -1):
+			# set clock low to read data pin
+			GPIO.output(inClock, LOW)
+
+			# check value of data pin and write to proper binary location in state
+			if (GPIO.input(inData)):
+				byte |= (1 << i)
+
+			# set clock high for next cycle
+			GPIO.output(inClock, HIGH)
+
+		# put state into an array
+		# in this case, a 0 in state will be considered ON (1) in the array
+		# it assumes that the input pins are pulled up and active low (for example, a button press will send a LOW signal and will be HIGH otherwise)
+		for i in range (8 * numOfRegisters):
+			if (~state & (1 << i)):
+				stateArray[i] = 1
+			else:
+				stateArray[i] = 0
+
+
+ledShift = ShiftOut(ledLatch, ledClock, ledData, 1)
+
+while(True):
+	ledShift.setAll()
+	sleep(1)
+	ledShift.clear()
+	sleep(1)

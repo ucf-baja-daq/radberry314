@@ -7,7 +7,7 @@ import sys
 from file_functs import write_chunks
 
 num_runs_per_chunk = 10
-chunk_sizes = [1000, 2000, 3000,  4000, 5000, 6000, 7000, 8000, 9000]
+chunk_sizes = [4500, 4700, 4900, 5100, 5300, 5500, 5700, 5900, 6100, 6300, 6500, 6700, 6900, 7100, 7300, 7500]
 times = []
 
 print('Starting test suite')

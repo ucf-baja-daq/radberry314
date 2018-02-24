@@ -3,3 +3,5 @@ io_examples/files
 .vs
 .vscode
 data
+*.csv
+*.xlsx

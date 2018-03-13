@@ -6,7 +6,7 @@ import logging
 import RPi.GPIO as GPIO
 from RPi.GPIO import HIGH, LOW, BOARD
 
-class ShiftOut():
+class shift_out():
     """Used to interface with 74HC595 shift register on Raspberry Pi"""
     def __init__(self, latch_pin, clock_pin, serial_pin, number_of_registers):
         # shift register control pins

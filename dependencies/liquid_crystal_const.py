@@ -1,5 +1,3 @@
-
-
 # commands
 LCD_CLEARDISPLAY = 0x01
 LCD_RETURNHOME = 0x02

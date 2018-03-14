@@ -22,7 +22,7 @@ class shift_out():
         # corresponds to pin 1
         self.register = 0
 
-        # setup pin binary values - used to alter specific values in self.register
+        # setup pin binary values - used to alter specific values in self.register - least significant bit first
         self.pins = [0] * 8 * self.number_of_registers
         for i in range(8 * self.number_of_registers):
             self.pins[i] = 2 ^ i
@@ -65,6 +65,8 @@ class shift_out():
 
     def set(self, index, value):
         """Set the value of a specified pin in self.register"""
+        # index starts at 0 and starts at the least significant bit of the register (right to left)
+
         logging.debug("Setting register {:d} to {:d}".format(index + 1, value))
         if value:
             self.register |= self.pins[index]

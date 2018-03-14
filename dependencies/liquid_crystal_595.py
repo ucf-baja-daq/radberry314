@@ -6,15 +6,14 @@ from shift_out import shift_out
 import liquid_crystal_const
 
 # shift register pin addresses
-ENABLE_PIN = 0b00000001
-RS_PIN = 0b10000000
-LED1_PIN = 0b00100000
-LED2_PIN = 0b01000000
-DATABITS = 0b00011110
-PIN_D4 = 0b00010000
-PIN_D5 = 0b00001000
-PIN_D6 = 0b00000100
-PIN_D7 = 0b00000010
+RS_PIN = 0
+PIN_D7 = 1
+PIN_D6 = 2
+PIN_D5 = 3
+PIN_D4 = 4
+LED1_PIN = 5
+LED2_PIN = 6
+ENABLE_PIN = 7
 
 class liquid_crystal_595():
     """class to interface with lcd over shift register"""
@@ -25,3 +24,6 @@ class liquid_crystal_595():
 
         # clear shift register
         self.sr.clear()
+
+
+    self.sr.set()

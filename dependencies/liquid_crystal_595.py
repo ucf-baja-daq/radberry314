@@ -14,6 +14,8 @@ PIN_D4 = 4
 LED1_PIN = 5
 LED2_PIN = 6
 ENABLE_PIN = 7
+LED1_PIN = 0b00100000
+LED2_PIN = 0b01000000
 
 class liquid_crystal_595():
     """class to interface with lcd over shift register"""

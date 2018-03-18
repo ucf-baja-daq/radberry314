@@ -5,7 +5,7 @@ from dependencies.ShiftIn import ShiftIn
 from dependencies.ShiftOut import ShiftOut
 
 import RPi.GPIO as GPIO
-from GPIO import IN, OUT, HIGH, LOW
+from GPIO import IN, OUT, HIGH, LOW, BOARD
 
 GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(BOARD)

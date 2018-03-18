@@ -116,10 +116,14 @@ class liquid_crystal_595():
 
 
     def display(self):
-
+        """turn on display"""
+        self._display_control |= LCD_DISPLAYON;
+        command(LCD_DISPLAYCONTROL | self._display_control);
 
     def no_cursor(self):
-
+        """hide cursor"""
+        self._display_control &= ~LCD_CURSORON
+        self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def cursor(self):
         """show cursor"""

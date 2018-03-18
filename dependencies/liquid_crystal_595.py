@@ -140,7 +140,9 @@ class liquid_crystal_595():
 
 
     def right_to_left(self):
-
+        """display text from right to left"""
+        self._display_mode &= ~LCD_ENTRYLEFT
+        self._command(LCD_ENTRYMODESET | self._display_mode)
 
     def autoscroll(self):
         """right justify text from the cursor"""

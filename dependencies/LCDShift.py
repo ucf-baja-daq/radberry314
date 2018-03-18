@@ -6,7 +6,8 @@ from shift_out import shift_out
 from time import sleep
 import RPi.GPIO as GPIO
 from GPIO import OUT, HIGH, LOW
-# commands
+
+# Commands
 LCD_CLEARDISPLAY = 0x01
 LCD_RETURNHOME = 0x02
 LCD_ENTRYMODESET = 0x04
@@ -16,25 +17,36 @@ LCD_FUNCTIONSET = 0x20
 LCD_SETCGRAMADDR = 0x40
 LCD_SETDDRAMADDR = 0x80
 
-# flags for display entry mode
+# Entry flags
 LCD_ENTRYRIGHT = 0x00
 LCD_ENTRYLEFT = 0x02
 LCD_ENTRYSHIFTINCREMENT = 0x01
 LCD_ENTRYSHIFTDECREMENT = 0x00
 
-# flags for display/cursor shift
+# Control flags
+LCD_DISPLAYON = 0x04
+LCD_DISPLAYOFF = 0x00
+LCD_CURSORON = 0x02
+LCD_CURSOROFF = 0x00
+LCD_BLINKON = 0x01
+LCD_BLINKOFF = 0x00
+
+# Move flags
 LCD_DISPLAYMOVE = 0x08
 LCD_CURSORMOVE = 0x00
 LCD_MOVERIGHT = 0x04
 LCD_MOVELEFT = 0x00
 
-# flags for function set
+# Function set flags
 LCD_8BITMODE = 0x10
 LCD_4BITMODE = 0x00
 LCD_2LINE = 0x08
 LCD_1LINE = 0x00
 LCD_5x10DOTS = 0x04
 LCD_5x8DOTS = 0x00
+
+# Offset for up to 4 rows.
+LCD_ROW_OFFSETS = (0x00, 0x40, 0x14, 0x54)
 
 # shift register pin addresses
 PIN_D4 = 0
@@ -44,7 +56,7 @@ PIN_D7 = 3
 PIN_RS = 4
 PIN_E = 5
 
-class shift_lcd():
+class LCDShift():
     """class to interface with lcd over shift register"""
 
     #### initialization functions ####
@@ -68,12 +80,13 @@ class shift_lcd():
         # location control
         self._num_lines = 0
         self._current_line = 0
+        self._cols = 0
 
     def begin(self, cols, lines, dotsize):
         """set up lcd dimensions"""
 
         # only support up to 2 lines
-        if (lines > 1):
+        if lines > 1:
             self._display_function |= LCD_2LINE
 
         # total number of lines
@@ -81,6 +94,9 @@ class shift_lcd():
 
         # current line. default 0 (first line)
         self._current_line = 0
+
+        # total number of columns
+        self._cols = cols
 
         # for some 1 line displays you can select a 10 pixel high font
         if dotsize and lines == 1:
@@ -136,26 +152,24 @@ class shift_lcd():
         self._command(LCD_RETURNHOME)
         sleep(0.002)
 
-    def set_cursor(col, row):
+    def set_cursor(self, col, row):
         """set cursor location"""
-        row_offsets = {0x00, 0x40, 0x14, 0x54}
-
         # if row is more than num_lines, make it last row
         # row count starts at 0
         if row >= self._num_lines:
             row = self._num_lines - 1
 
-        self._command(LCD_SETDDRAMADDR | (col + row_offsets[row]))
+        self._command(LCD_SETDDRAMADDR | (col + LCD_ROW_OFFSETS[row]))
 
     def no_display(self):
         """turn off display"""
-        self._display_control &= ~LCD_DISPLAYON;
-        self._command(LCD_DISPLAYCONTROL | self._display_control);
+        self._display_control &= ~LCD_DISPLAYON
+        self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def display(self):
         """turn on display"""
-        self._display_control |= LCD_DISPLAYON;
-        self._command(LCD_DISPLAYCONTROL | self._display_control);
+        self._display_control |= LCD_DISPLAYON
+        self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def no_cursor(self):
         """hide cursor"""
@@ -217,6 +231,25 @@ class shift_lcd():
         # write bits in charmap
         for i in range(8):
             self._write(charmap[i])
+
+    def message(self, text):
+        """write text to display"""
+        line = 0
+
+        # iterate through each character
+        for char in text:
+            # advance to next line if character is newline
+            if char == '\n':
+                line += 1
+
+                # move to left or right side depending on text direction
+                col = 0 if self._display_mode & LCD_ENTRYLEFT > 0 else self._cols - 1
+
+                self.set_cursor(col, line)
+
+            # write character to display
+            else:
+                self._write(ord(char))
 
     #### mid level functions ###
     def _command(self, value):

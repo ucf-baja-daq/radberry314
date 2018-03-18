@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 from RPi.GPIO import HIGH, LOW, IN, PUD_UP
 from time import sleep, asctime, time, localtime
 
-class hall_sensor():
+class HallSensor():
     """read data from a hall sensor on a Raspberry Pi 3"""
 
     def __init__(self, pin, pull_up, number_of_magnets, file_path):

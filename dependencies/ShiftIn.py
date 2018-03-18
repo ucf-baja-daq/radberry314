@@ -7,7 +7,7 @@ import RPi.GPIO as GPIO
 from RPi.GPIO import HIGH, LOW, BOARD
 from time import sleep
 
-class shift_in():
+class ShiftIn():
     """Used to interface with CD4021B shift register on Raspberry Pi"""
     def __init__(self, latch_pin, clock_pin, serial_pin, number_of_registers):
         # shift register control pins

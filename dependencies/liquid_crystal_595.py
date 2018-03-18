@@ -1,5 +1,5 @@
 # liquid_crystal_595.py
-# Library to interface with LCD through a shift register on Raspberry Pi 3
+# Library to interface with HD44780 LCD through a shift register on Raspberry Pi 3
 
 # import shift register class
 from shift_out import shift_out
@@ -99,12 +99,37 @@ class liquid_crystal_595():
         self._shift_reg.write_out()
 
         # put lcd into 4bit mode
+        # according to HD44780 datasheet, figure 24 on page 46
+        self._write4bits(0x03)
+        sleep(0.0045)
 
-        # start in 8bit mode, try to set 4bit mode
+        self._write4bits(0x03)
+        sleep(0.0045)
+
+        self._write4bits(0x03)
+        sleep(0.00015)
+
+        self._write4bits(0x02)
+
+        # setup values defined in display function above
+        self._command(LCD_FUNCTIONSET | self._display_function)
+
+        # turn the display on with no cursor and no blinking by default
+        self._display_control = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF
+        self.display()
+
+        # clear display
+        self.clear()
+
+        # initialize text direction as left to right
+        self._display_mode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT
+        self._command(LCD_ENTRYMODESET | self._display_mode)
 
     #### user functions ####
     def clear(self):
-
+        """clear display and set cursor to 0,0"""
+        self._command(LCD_CLEARDISPLAY)
+        sleep(0.002)
 
     def home(self):
         """set cursor position to 0,0"""

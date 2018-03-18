@@ -27,8 +27,8 @@ class shift_out():
         for i in range(8 * self.number_of_registers):
             self.pins[i] = 2 ^ i
 
-        # set all registers to default value of self.register above
-        self.write_out()
+        # clear display
+        self.clear()
 
     def write_out(self):
         """latch values in self.register to shift register and output"""
@@ -65,7 +65,7 @@ class shift_out():
 
     def set(self, index, value):
         """Set the value of a specified pin in self.register"""
-        # index starts at 0 and starts at the least significant bit of the register (right to left)
+        # 0 is pin 1 or QA of the shift register.
 
         logging.debug("Setting register {:d} to {:d}".format(index + 1, value))
         if value:

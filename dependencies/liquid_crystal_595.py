@@ -113,7 +113,9 @@ class liquid_crystal_595():
 
 
     def no_display(self):
-
+        """turn off display"""
+        self._display_control &= ~LCD_DISPLAYON;
+        command(LCD_DISPLAYCONTROL | self._display_control);
 
     def display(self):
         """turn on display"""

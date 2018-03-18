@@ -125,10 +125,14 @@ class liquid_crystal_595():
 
 
     def no_blink(self):
-
+        """don't blink cursor"""
+        self._display_control |= ~LCD_BLINKON
+        self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def blink(self):
-
+        """blink cursor"""
+        self._display_control |= LCD_BLINKON
+        self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def scroll_display_left(self):
         """scroll text from right to left"""

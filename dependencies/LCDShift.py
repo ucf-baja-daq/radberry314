@@ -64,9 +64,6 @@ class LCDShift():
         # set up shift register object. Only one register
         self._shift_reg = shift_out(latch_pin, clock_pin, serial_pin, 1)
 
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BOARD)
-
         # set up pin outputs
         GPIO.setup(latch_pin, OUT)
         GPIO.setup(clock_pin, OUT)

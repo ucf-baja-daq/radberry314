@@ -143,7 +143,9 @@ class liquid_crystal_595():
 
 
     def autoscroll(self):
-
+        """right justify text from the cursor"""
+        self._display_mode &= LCD_ENTRYSHIFTINCREMENT
+        self._command(LCD_ENTRYMODESET | self._display_mode)
 
     def no_autoscroll(self):
         """left justify text from the cursor"""

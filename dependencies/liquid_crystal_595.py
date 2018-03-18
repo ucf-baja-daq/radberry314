@@ -137,7 +137,9 @@ class liquid_crystal_595():
 
 
     def left_to_right(self):
-
+        """display text from left to right"""
+        self._display_mode &= LCD_ENTRYLEFT
+        self._command(LCD_ENTRYMODESET | self._display_mode)
 
     def right_to_left(self):
         """display text from right to left"""

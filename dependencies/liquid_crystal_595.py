@@ -107,20 +107,30 @@ class liquid_crystal_595():
 
 
     def home(self):
+        """set cursor position to 0,0"""
+        self._command(LCD_RETURNHOME)
+        sleep(0.002)
 
+    def set_cursor(col, row):
+        """set cursor location"""
+        row_offsets = {0x00, 0x40, 0x14, 0x54}
 
-    def set_cursor():
+        # if row is more than num_lines, make it last row
+        # row count starts at 0
+        if row >= self._num_lines:
+            row = self._num_lines - 1
 
+        self._command(LCD_SETDDRAMADDR | (col + row_offsets[row]))
 
     def no_display(self):
         """turn off display"""
         self._display_control &= ~LCD_DISPLAYON;
-        command(LCD_DISPLAYCONTROL | self._display_control);
+        self._command(LCD_DISPLAYCONTROL | self._display_control);
 
     def display(self):
         """turn on display"""
         self._display_control |= LCD_DISPLAYON;
-        command(LCD_DISPLAYCONTROL | self._display_control);
+        self._command(LCD_DISPLAYCONTROL | self._display_control);
 
     def no_cursor(self):
         """hide cursor"""
@@ -177,7 +187,7 @@ class liquid_crystal_595():
         location &= 0x7
 
         # ???
-        self._command(LCD_SETCGRAMADDR | location << 3)
+        self._command(LCD_SETCGRAMADDR | (location << 3))
 
         # write bits in charmap
         for i in range(8):

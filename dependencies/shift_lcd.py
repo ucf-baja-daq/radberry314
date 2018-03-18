@@ -44,7 +44,7 @@ PIN_D7 = 3
 PIN_RS = 4
 PIN_E = 5
 
-class liquid_crystal_595():
+class shift_lcd():
     """class to interface with lcd over shift register"""
 
     #### initialization functions ####

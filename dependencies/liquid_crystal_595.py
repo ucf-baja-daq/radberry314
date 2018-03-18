@@ -122,11 +122,13 @@ class liquid_crystal_595():
 
 
     def cursor(self):
-
+        """show cursor"""
+        self._display_control |= LCD_CURSORON
+        self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def no_blink(self):
         """don't blink cursor"""
-        self._display_control |= ~LCD_BLINKON
+        self._display_control &= ~LCD_BLINKON
         self._command(LCD_DISPLAYCONTROL | self._display_control)
 
     def blink(self):
@@ -144,7 +146,7 @@ class liquid_crystal_595():
 
     def left_to_right(self):
         """display text from left to right"""
-        self._display_mode &= LCD_ENTRYLEFT
+        self._display_mode |= LCD_ENTRYLEFT
         self._command(LCD_ENTRYMODESET | self._display_mode)
 
     def right_to_left(self):
@@ -154,7 +156,7 @@ class liquid_crystal_595():
 
     def autoscroll(self):
         """right justify text from the cursor"""
-        self._display_mode &= LCD_ENTRYSHIFTINCREMENT
+        self._display_mode |= LCD_ENTRYSHIFTINCREMENT
         self._command(LCD_ENTRYMODESET | self._display_mode)
 
     def no_autoscroll(self):

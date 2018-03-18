@@ -1,4 +1,4 @@
-# PIN_DEFS.py
+# pin_defs.py
 """define pin numbers for each device"""
 
 HALL_SEN_1 = 8

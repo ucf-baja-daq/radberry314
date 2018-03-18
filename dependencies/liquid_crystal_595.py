@@ -131,9 +131,11 @@ class liquid_crystal_595():
 
 
     def scroll_display_left(self):
+        """scroll text from right to left"""
         self._command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT)
 
     def scroll_display_right(self):
+        """scroll text from left to right"""
         self._command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT)
 
     def left_to_right(self):

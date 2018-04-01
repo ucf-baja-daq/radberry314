@@ -115,17 +115,23 @@ if __name__ == "__main__":
                 if input.state_array[pin.IN_HALL]:
                     # hall sensor toggle is on
 
+                    log.info("Hall toggle switch ON. Displaying hall sensor states.")
+
                     # TODO: display value of hall sensors for verification
 
                 if input.state_array[pin.IN_STAIN]:
                     # strain gauge toggle is on
+
+                    log.info("Strain toggle switch ON. Calibrating strain gauges.")
 
                     # TODO: use buttons to zero/calibrate strain gauges
 
                 if input.state_array[pin.IN_VIBR]:
                     # arm vibration toggle is on
 
-                    # TODO: use buttons to zero/calibrate encoder
+                    log.info("Vibration toggle swith ON. Calibrating encoders.")
+
+                    # TODO: use buttons to zero/calibrate encoders
 
             else:
                 # system is in data collection mode
@@ -136,14 +142,20 @@ if __name__ == "__main__":
                 if input.state_array[pin.IN_HALL]:
                     # hall sensor toggle is on
 
+                    log.info("Hall toggle switch ON. Collecting RPM data.")
+
                     # TODO: collect rpm data from hall sensors
 
                 if input.state_array[pin.IN_STAIN]:
                     # strain gauge toggle is on
 
+                    log.info("Strain toggle switch ON. Collecting strain data.")
+
                     # TODO: collect arm deflection data from strain gauges
 
                 if input.state_array[pin.IN_VIBR]:
                     # arm vibration toggle is on
+
+                    log.info("Vibration toggle swith ON. Collecting arm vibration data.")
 
                     # TODO: collect vibration data from angular encoder

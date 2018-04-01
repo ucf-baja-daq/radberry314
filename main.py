@@ -5,13 +5,14 @@
 # python libraries
 import logging as log
 from time import sleep, strftime
+import multiprocessing as mp
 
 # import bajadaq classes
-from bajadaq.dependencies.HallSensor import HallSensor
-from bajadaq.dependencies.LCDShift import LCDShift
-from bajadaq.dependencies.LIS3DH import LIS3DH
-from bajadaq.dependencies.ShiftIn import ShiftIn
-from bajadaq.dependencies.ShiftOut import ShiftOut
+from bajadaq.HallSensor import HallSensor
+from bajadaq.LCDShift import LCDShift
+from bajadaq.LIS3DH import LIS3DH
+from bajadaq.ShiftIn import ShiftIn
+from bajadaq.ShiftOut import ShiftOut
 
 # import pin numbers
 import pin
@@ -40,7 +41,7 @@ GPIO.setmode(BOARD)
     # -CRITICAL: A serious error, indicating that the program itself may be unable to continue running.
 
 # make log filename based on current time and date
-log_filename = "log_" + strftime("%Y-%m-%d--%H-%M-%S") + ".txt"
+log_filename = "logs/log_" + strftime("%Y-%m-%d--%H-%M-%S") + ".txt"
 
 # setup log filename and default log level
 log.basicConfig(filename=log_filename, level=log.DEBUG)
@@ -68,6 +69,7 @@ start_tog_message_flag = True
 ### MAIN LOOP ###
 #################
 
+# if called from command line
 if __name__ == "__main__":
     while main_flag:
         # check shift register inputs

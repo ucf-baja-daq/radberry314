@@ -122,8 +122,14 @@ if __name__ == "__main__":
                 if input.state_array[pin.IN_HALL]:
                     # hall sensor toggle is on
 
+                    # TODO: collect rpm data from hall sensors
+
                 if input.state_array[pin.IN_STAIN]:
                     # strain gauge toggle is on
 
+                    # TODO: collect arm deflection data from strain gauges
+
                 if input.state_array[pin.IN_VIBR]:
                     # arm vibration toggle is on
+
+                    # TODO: collect vibration data from angular encoder

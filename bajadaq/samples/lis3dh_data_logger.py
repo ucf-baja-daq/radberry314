@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from LIS3DH import LIS3DH
+from .dependencies.LIS3DH import LIS3DH
 import time
 
 sensor = LIS3DH(debug=True)

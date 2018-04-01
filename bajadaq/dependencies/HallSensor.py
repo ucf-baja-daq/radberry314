@@ -25,7 +25,7 @@ class HallSensor():
         # set up data file to write to
         # make unique by using current time
         self.local_time = str(asctime(localtime(time()))).replace(" ", "_")
-        self.file_name = str(file_path) + "_" + str(pin) + "_" local_time + ".csv"
+        self.file_name = str(file_path) + "_" + str(pin) + "_" + local_time + ".csv"
         self.data_file = open(self.file_str, "w")
 
         logging.info("Writing to {}".format(file_name))
@@ -56,7 +56,7 @@ class HallSensor():
             # determine time since start
             current_time = time() - start_time
 
-            if input = HIGH and passing_flag = False:
+            if input == HIGH and passing_flag == False:
                 # magnet has just entered sensor range
 
                 # set passing flag true so program doesn't read magnet until next pass
@@ -76,7 +76,7 @@ class HallSensor():
                 self.data_file.write(",".join([current_time, self.rpm]))
                 self.data_file.flush()
 
-            elif input = LOW and passing_flag = True:
+            elif input == LOW and passing_flag == True:
                 # magnet has just left sensor range
 
                 # set passing_flag false so program reads next magnet pass

@@ -2,6 +2,5 @@ io_examples/files
 *.pyc
 .vs
 .vscode
-data
 *.csv
 *.xlsx

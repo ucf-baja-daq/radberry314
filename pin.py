@@ -1,0 +1,40 @@
+# pin.py
+"""define pin numbers for each device"""
+
+HALL_SEN_PRIMARY = 8
+HALL_SEN_SECONDARY = 10
+
+SO1_SERIAL = 22
+SO1_LATCH = 24
+S01_CLOCK = 26
+
+SI_SERIAL = 33
+SI_CLOCK = 35
+SI_LATCH = 37
+
+SO2_SERIAL = 36
+SO2_LATCH = 38
+SO2_CLOCK = 40
+
+ENCODER_A = 29
+ENCODER_B = 31
+
+# led shift register pins
+LED_HALL_RED = 0
+LED_HALL_GREEN = 1
+LED_VIBR_RED = 2
+LED_VIBR_GREEN = 3
+LED_STRAIN_RED = 4
+LED_STRAIN_GREEN = 5
+LED_CAL_RED = 6
+LED_CAL_GREEN = 7
+
+# input shift register pins
+IN_SPEED = 0
+IN_SELECT = 1
+IN_CYCLE = 2
+IN_HALL = 3
+IN_STRAIN = 4
+IN_VIBR = 5
+IN_CAL = 6
+IN_SPARE = 7

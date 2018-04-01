@@ -2,10 +2,9 @@
 # Library to interface with HD44780 LCD through a shift register on Raspberry Pi 3
 
 # import shift register class
-from shift_out import shift_out
 from time import sleep
 import RPi.GPIO as GPIO
-from GPIO import OUT, HIGH, LOW
+from RPi.GPIO import OUT, HIGH, LOW
 
 # Commands
 LCD_CLEARDISPLAY = 0x01

@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
                 # flip start_tog_flag
                 start_tog_flag = False
-                
+
         else:
             # start_tog_flag flips if the toggles are set to the correct position
             # now the main functions can start
@@ -118,3 +118,12 @@ if __name__ == "__main__":
                 log.info("System is in data collection mode.")
 
                 # check main toggle switches
+
+                if input.state_array[pin.IN_HALL]:
+                    # hall sensor toggle is on
+
+                if input.state_array[pin.IN_STAIN]:
+                    # strain gauge toggle is on
+
+                if input.state_array[pin.IN_VIBR]:
+                    # arm vibration toggle is on

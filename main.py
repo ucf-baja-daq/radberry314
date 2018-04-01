@@ -108,9 +108,24 @@ if __name__ == "__main__":
             # check whether system is in calibration mode or in data collection mode based on calibration toggle switch
             if input.state_array[pin.IN_CAL]:
                 # system is in calibration mode
-                # TODO: calibration mode
 
                 log.info("System is in calibration mode.")
+
+                # check main toggle switches
+                if input.state_array[pin.IN_HALL]:
+                    # hall sensor toggle is on
+
+                    # TODO: display value of hall sensors for verification
+
+                if input.state_array[pin.IN_STAIN]:
+                    # strain gauge toggle is on
+
+                    # TODO: use buttons to zero/calibrate strain gauges
+
+                if input.state_array[pin.IN_VIBR]:
+                    # arm vibration toggle is on
+
+                    # TODO: use buttons to zero/calibrate encoder
 
             else:
                 # system is in data collection mode
@@ -118,7 +133,6 @@ if __name__ == "__main__":
                 log.info("System is in data collection mode.")
 
                 # check main toggle switches
-
                 if input.state_array[pin.IN_HALL]:
                     # hall sensor toggle is on
 

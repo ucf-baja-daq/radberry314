@@ -3,11 +3,12 @@ import logging
 import RPi.GPIO as GPIO
 from RPi.GPIO import HIGH, LOW, IN, PUD_UP
 from time import sleep, asctime, time, localtime
+from writer import writer
 
 class HallSensor():
     """read data from a hall sensor on a Raspberry Pi 3"""
 
-    def __init__(self, pin, pull_up, number_of_magnets, file_path):
+    def __init__(self, pin, pull_up, number_of_magnets, file_path, identifier, main_comm):
         logging.info("Setting up {} hall sensor on pin {}".format(pull_up * "pulled up", pin))
 
         # Raspberry Pi pin that hall sensor is connected to
@@ -24,17 +25,19 @@ class HallSensor():
 
         # set up data file to write to
         # make unique by using current time
-        self.local_time = str(asctime(localtime(time()))).replace(" ", "_")
-        self.file_name = str(file_path) + "_" + str(pin) + "_" + local_time + ".csv"
-        self.data_file = open(self.file_str, "w")
+        self.local_time = time.strftime("%Y-%m-%d--%H-%M-%S")
+        self.file_name = str(file_path) + local_time + identifier + ".csv"
 
-        logging.info("Writing to {}".format(file_name))
+        # create writer process
 
         # flag to control running loop
         self.run_flag = 0
 
         # variable to hold current rpm
         self.rpm = 0
+
+        # queue object
+        self.main_comm = main_comm
 
     def collect_rpm():
         """collect hall sensor data and write to file"""

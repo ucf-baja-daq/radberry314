@@ -2,13 +2,17 @@ import logging
 
 import RPi.GPIO as GPIO
 from RPi.GPIO import HIGH, LOW, IN, PUD_UP
-from time import sleep, asctime, time, localtime
-from writer import writer
+from time import time, sleep, strftime
+from multiprocessing import Process, Pipe
+
+# setup RPi
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
 
 class HallSensor():
     """read data from a hall sensor on a Raspberry Pi 3"""
 
-    def __init__(self, pin, pull_up, number_of_magnets, file_path, identifier, main_comm):
+    def __init__(self, pin, pull_up, number_of_magnets, identifier, w, a):
         logging.info("Setting up {} hall sensor on pin {}".format(pull_up * "pulled up", pin))
 
         # Raspberry Pi pin that hall sensor is connected to
@@ -23,23 +27,17 @@ class HallSensor():
         # number of magnets on rotating element
         self.number_of_magnets = number_of_magnets
 
-        # set up data file to write to
-        # make unique by using current time
-        self.local_time = time.strftime("%Y-%m-%d--%H-%M-%S")
-        self.file_name = str(file_path) + local_time + identifier + ".csv"
+        self.a = a
 
-        # create writer process
+        self.w = w
 
         # flag to control running loop
-        self.run_flag = 0
+        self.run_flag = 1
 
         # variable to hold current rpm
         self.rpm = 0
 
-        # queue object
-        self.main_comm = main_comm
-
-    def collect_rpm():
+    def collect_rpm(self):
         """collect hall sensor data and write to file"""
 
         logging.info("Collecting data from hall sensor on pin {}".format(self.pin))
@@ -48,13 +46,14 @@ class HallSensor():
         t1 = time()
         t2 = 0
         start_time = time()
+        input = 0
 
         # flag to indicate magnet is passing sensor
         passing_flag = False
 
         while self.run_flag:
             # read hall sensor pin
-            input = GPIO.input(self.pin)
+            input = not GPIO.input(self.pin)
 
             # determine time since start
             current_time = time() - start_time
@@ -73,11 +72,11 @@ class HallSensor():
                 elapsed_time = t2 - t1
 
                 # calculate current rpm
-                self.rpm = 60 / number_of_magnets / elapsed_time
+                self.rpm = 60 / self.number_of_magnets / elapsed_time
 
                 # write data point to file
-                self.data_file.write(",".join([current_time, self.rpm]))
-                self.data_file.flush()
+                self.a.send(','.join([str(current_time), str(self.rpm)]) + "\n")
+                print(','.join([str(current_time), str(self.rpm)]))
 
             elif input == LOW and passing_flag == True:
                 # magnet has just left sensor range
@@ -85,10 +84,9 @@ class HallSensor():
                 # set passing_flag false so program reads next magnet pass
                 passing_flag = False
 
+        self.a.send("c")
+        self.a.close()
+
         def set_flag(self, flag):
             """Set running flag false to end loop"""
             self.run_flag = flag
-
-        def close_file(self):
-            """Close file"""
-            self.data_file.flush()

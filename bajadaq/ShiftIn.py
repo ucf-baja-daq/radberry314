@@ -4,7 +4,7 @@
 
 import logging
 import RPi.GPIO as GPIO
-from RPi.GPIO import HIGH, LOW, BOARD
+from RPi.GPIO import HIGH, LOW, BOARD, OUT, IN
 from time import sleep
 
 class ShiftIn():
@@ -14,6 +14,10 @@ class ShiftIn():
         self.latch_pin = latch_pin
         self.clock_pin = clock_pin
         self.serial_pin = serial_pin
+
+        GPIO.setup(self.latch_pin, OUT)
+        GPIO.setup(self.clock_pin, OUT)
+        GPIO.setup(self.serial_pin, IN)
 
         # number of shift registers controlled by 3 pins above
         self.number_of_registers = number_of_registers
@@ -36,9 +40,11 @@ class ShiftIn():
         GPIO.output(self.latch_pin, LOW)
 
         # move from pin 8 to pin 1 on shift register
-        for i in range(self.number_of_registers - 1, -1, -1):
+        for i in range(self.number_of_registers * 8 - 1, -1, -1):
             # set clock low to read data pin
             GPIO.output(self.clock_pin, LOW)
+
+            logging.debug("pin " + str(i + 1) + ": " + str(GPIO.input(self.serial_pin)))
 
             # check value of data pin and write to proper binary location in state
             if GPIO.input(self.serial_pin):

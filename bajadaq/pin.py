@@ -1,0 +1,16 @@
+# pin.py
+"""define pin numbers for each device"""
+
+HALL_SEN_1 = 8
+HALL_SEN_2 = 10
+SO1_SERIAL = 22
+SO1_LATCH = 24
+S01_CLOCK = 26
+ACC1_DRDY = 29
+ACC2_DRDY = 31
+SI_SERIAL = 33
+SI_CLOCK = 35
+SI_LATCH = 37
+SO2_SERIAL = 36
+SO2_LATCH = 38
+SO2_CLOCK = 40

@@ -3,7 +3,8 @@
 ###############
 
 # python libraries
-import logging as log
+import logging
+import logging.handlers
 from time import sleep, strftime
 import multiprocessing as mp
 
@@ -42,8 +43,22 @@ GPIO.setmode(BOARD)
 # make log filename based on current time and date
 log_filename = "logs/log_" + strftime("%Y-%m-%d--%H-%M-%S") + ".txt"
 
-# setup log filename and default log level
-log.basicConfig(filename=log_filename, level=log.DEBUG)
+# setup log
+# file logs all
+# only INFO and above to console
+logger = logging.getLogger(__name__)
+log_file_handler = logging.FileHandler(log_filename)
+log_stream_handler = logging.StreamHandler()
+log_formatter = logging.Formatter("(%(asctime)s)%(processName)s-%(levelname)s: %(message)s")
+
+log_file_handler.setFormat(log_formatter)
+log_stream_handler.setFormat(log_formatter)
+
+log_file_handler.setLevel(logging.DEBUG)
+log_stream_handler.setLevel(logging.INFO)
+
+logger.addHandler(log_file_handler)
+logger.addHandler(log_stream_handler)
 
 
 ## Shift Registers ##
@@ -60,47 +75,69 @@ main_flag = True
 
 # start toggle configuration flag
 start_tog_flag = True
-start_tog_message_flag = True
 
 # data collection flag
 hall_flag = False
 strain_flag = False
 vibr_flag = False
 
+# log flags
+main_loop_log = True
+
+# log flagn
+cal_mode_log = True
+cal_hall_log = True
+cal_strain_log = True
+cal_vibr_log = True
+data_mode_log = True
+data_hall_log = True
+data_strain_log = True
+data_vibr_log = True
+start_tog_log = True
+
+
+
 #################
 ### MAIN LOOP ###
 #################
 
-# if called from command line
+# if called as main process
 if __name__ == "__main__":
+    logger.debug("Enter main program")
+
     while main_flag:
+        # initial log message
+        if main_loop_log:
+            logger.debug("Enter main loop. main_flag == {}".format(main_flag))
+
+            # set flag false so message is only logged once
+            main_loop_log = False
+
         # check shift register inputs
         input.read()
-        print(input.state)
 
         # if any of main collection toggles (hall, vibration, strain) are on on program start, problems could occur.
         # make user turn off main toggle switches in order for program to run.
-        #if start_tog_flag:
-        if False:
-            # if any main toggle switch is on
+        if start_tog_flag:
+            # check if any main toggle switch is on
             if input.state_array[pin.IN_HALL] or input.state_array[pin.IN_STRAIN] or input.state_array[pin.IN_VIBR]:
                 # inform user to turn main collection toggles OFF
                 # when flag is false, do nothing
-                if start_tog_message_flag:
+                if start_tog_log:
                     # log error
-                    log.error("One or more main collection toggles are in ON position. Waiting for user to turn all toggle switches off.")
+                    logger.error("One or more main collection toggles are in ON position. Waiting for user to turn all toggle switches off.")
 
                     # TODO: display message on LCD
 
                     # set flag false so error only displays once
-                    start_tog_message_flag = False
+                    start_tog_log = False
 
             else:
                 # all toggle switches are off, program can continue
                 # if error message was displayed, log that error was resolved. otherwise do nothing
-                if not start_tog_message_flag:
+                if not start_tog_log:
                     # flag was tripped, error is resolved
-                    log.info("Toggles have moved to OFF position. Program can now start.")
+                    logger.info("Toggles have moved to OFF position. Program can now start.")
 
                 # flip start_tog_flag
                 start_tog_flag = False
@@ -109,104 +146,186 @@ if __name__ == "__main__":
             # start_tog_flag flips if the toggles are set to the correct position
             # now the main functions can start
 
-            log.info("Program start.")
+            logger.info("Main toggles switches are OFF. Main program start.")
 
             # check whether system is in calibration mode or in data collection mode based on calibration toggle switch
-            # if input.state_array[pin.IN_CAL]:
-            if False:
+            if input.state_array[pin.IN_CAL]:
                 # system is in calibration mode
 
-                log.info("System is in calibration mode.")
+                if cal_mode_log:
+                    logger.info("System is in calibration mode.")
+
+                    # set flags to display data collection next toggle switch
+                    data_mode_log = True
+                    cal_mode_log = False
+
 
                 # check main toggle switches
+
+                # hall sensor calibration
                 if input.state_array[pin.IN_HALL]:
                     # hall sensor toggle is on
 
-                    log.info("Hall toggle switch ON. Displaying hall sensor states.")
+                    if cal_hall_log:
+                        logger.info("Enter hall sensor calibration.")
+
+                        # set log false so it only displays once
+                        cal_hall_log = False
 
                     # TODO: display value of hall sensors for verification
 
+                elif not (input.state_array(pin.IN_HALL) and cal_hall_log):
+                    logger.info("Exit hall sensor calibration.")
+
+                    # set log true for next toggle switch
+                    cal_hall_log = True
+
+
+                # strain gauge calibration
                 if input.state_array[pin.IN_STAIN]:
                     # strain gauge toggle is on
 
-                    log.info("Strain toggle switch ON. Calibrating strain gauges.")
+                    if cal_strain_log:
+                        logger.info("Enter strain gauge calibration.")
+
+                        # set log false so it only displays once
+                        cal_strain_log = False
 
                     # TODO: use buttons to zero/calibrate strain gauges
 
+                elif not (input.state_array(pin.IN_STAIN) and cal_strain_log):
+                    logger.info("Exit strain gauge calibration.")
+
+                    # set log true for next toggle switch
+                    cal_strain_log = True
+
+
+                # encoder calibration
                 if input.state_array[pin.IN_VIBR]:
                     # arm vibration toggle is on
 
-                    log.info("Vibration toggle swith ON. Calibrating encoders.")
+                    if cal_vibr_log:
+                        logger.info("Enter encoder calibration.")
+
+                        # set log false so it only displays once
+                        cal_vibr_log = False
 
                     # TODO: use buttons to zero/calibrate encoders
 
+                elif not (input.state_array(pin.IN_VIBR) and cal_vibr_log):
+                    logger.info("Exit encoder calibration.")
+
+                    # set log true for next toggle switch
+                    cal_vibr_log = True
+
+            # otherwise, system is in data collection mode
             else:
                 # system is in data collection mode
+                if data_mode_log:
+                    logger.info("System is in data collection mode.")
 
-                log.info("System is in data collection mode.")
-
-                print("start")
+                    # set flags to display calibration next toggle switch
+                    data_mode_log = False
+                    cal_mode_log = True
 
                 # check main toggle switches
+
+                # hall sensor data collection
                 if input.state_array[pin.IN_HALL] and not hall_flag:
                     # hall sensor toggle is on
                     hall_flag = True
 
-                    log.info("Hall toggle switch ON. Collecting RPM data.")
+                    # log event
+                    if data_hall_log:
+                        logger.info("Begin hall sensor data collection.")
 
+                        data_hall_log = False
+
+                    # get local time for filename
                     local_time = strftime("%Y-%m-%d--%H-%M-%S")
-                    file_name1 = "/home/pi/daq/data/" + local_time + "primary" + ".csv"
-                    file_name2 = "/home/pi/daq/data/" + local_time + "secondary" + ".csv"
 
-                    # writer processes
-                    a1, b1 = mp.Pipe()
-                    a2, b2 = mp.Pipe()
+                    # create file names
+                    hall_file_primary = "/home/pi/daq/data/hall_" + local_time + "_primary" + ".csv"
+                    hall_file_secondary = "/home/pi/daq/data/hall_" + local_time + "_secondary" + ".csv"
 
-                    w1 = mp.Process(target=writer, args=(b1,file_name1,1,))
+                    # writer pipe communication channels
+                    hall_send_primary, hall_rec_primary = mp.Pipe()
+                    hall_send_secondary, hall_rec_secondary = mp.Pipe()
 
-                    w2 = mp.Process(target=writer, args=(b2,file_name2,1,))
+                    # create writer processes
+                    hall_writer_primary = mp.Process(target=writer, args=(hall_rec_primary,hall_file_primary,1,))
+                    hall_writer_secondary = mp.Process(target=writer, args=(hall_rec_secondary,hall_file_secondary,1,))
 
                     # create two hall sensor processes
-                    hall_primary = HallSensor(8, 0, 1, "primary", w1, a1)
+                    # TODO make number of magnets a variable
+                    hall_primary = HallSensor(pin.HALL_SEN_PRIMARY, 1, "primary", hall_writer_primary, hall_send_primary)
+                    hall_secondary = HallSensor(pin.HALL_SEN_SECONDARY, 3, "secondary", hall_writer_secondary, hall_send_secondary)
 
-                    hall_secondary = HallSensor(10, 0, 3, "secondary", w2, a2)
+                    # create hall sensor collection processes
+                    hall_collect_primary = mp.Process(target=hall_primary.run, args=())
+                    hall_collect_secondary = mp.Process(target=hall_secondary.run, args=())
 
-                    hall_primary_run = mp.Process(target=hall_primary.collect_rpm, args=())
+                    # begin hall sensor writer processes
+                    hall_writer_primary.start()
+                    hall_writer_secondary.start()
 
-                    hall_secondary_run = mp.Process(target=hall_secondary.collect_rpm, args=())
+                    # begin hall sensor collection processes
+                    hall_collect_primary.start()
+                    hall_collect_secondary.start()
 
-                    w1.start()
-                    w2.start()
-
-                    hall_primary_run.start()
-                    hall_secondary_run.start()
+                    # TODO send hall sensor speed to seven segment display
+                    # TODO add logging messages in writer and HallSensor
 
                 elif not input.state_array[pin.IN_HALL] and hall_flag:
+                    logger.info("End hall sensor data collection.")
 
-                    print("stop")
+                    hall_flag = False
+                    data_hall_log = True
+
                     # end collection
                     hall_primary.set_flag(False)
                     hall_secondary.set_flag(False)
 
-                    w1.join()
-                    w2.join()
+                    hall_writer_primary.join()
+                    hall_writer_secondary.join()
 
-                    sleep(1)
-
-                    hall_primary_run.join()
-                    hall_secondary_run.join()
+                    hall_collect_primary.join()
+                    hall_collect_secondary.join()
 
 
-                # if input.state_array[pin.IN_STRAIN]:
-                #     # strain gauge toggle is on
-                #
-                #     log.info("Strain toggle switch ON. Collecting strain data.")
-                #
-                #     # TODO: collect arm deflection data from strain gauges
-                #
-                # if input.state_array[pin.IN_VIBR]:
-                #     # arm vibration toggle is on
-                #
-                #     log.info("Vibration toggle swith ON. Collecting arm vibration data.")
-                #
-                #     # TODO: collect vibration data from angular encoder
+                # strain gauge data collection
+                if input.state_array[pin.IN_STRAIN] and not strain_flag:
+                    # strain gauge toggle is on
+                    strain_flag = True
+
+                    if data_strain_log:
+                        logger.info("Begin strain gauge data collection.")
+
+                        data_strain_log = False
+
+                    # TODO: collect arm deflection data from strain gauges
+
+                elif not input.state_array[pin.IN_STRAIN] and strain_flag:
+                    logger.info("End strain gauge data collection")
+
+                    strain_flag = False
+                    data_strain_log = True
+
+
+                # encoder vibration data collection
+                if input.state_array[pin.IN_VIBR] and not vibr_flag:
+                    # arm vibration toggle is on
+                    vibr_flag = True
+
+                    if data_vibr_log:
+                        logger.info("Begin encoder vibration data collection.")
+
+                        data_vibr_log = False
+
+                    # TODO: collect vibration data from angular encoder
+
+                elif not input.state_array[pin.IN_VIBR] and vibr_flag:
+                    logger.info("End encoder vibration data collection")
+
+                    vibr_flag = False
+                    data_vibr_log = True

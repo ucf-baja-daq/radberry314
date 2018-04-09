@@ -12,17 +12,14 @@ GPIO.setmode(GPIO.BOARD)
 class HallSensor():
     """read data from a hall sensor on a Raspberry Pi 3"""
 
-    def __init__(self, pin, pull_up, number_of_magnets, identifier, w, a):
-        logging.info("Setting up {} hall sensor on pin {}".format(pull_up * "pulled up", pin))
+    def __init__(self, pin, number_of_magnets, identifier, w, a):
+        logging.info("Setting up hall sensor on pin {}".format(pin))
 
         # Raspberry Pi pin that hall sensor is connected to
         self.pin = pin
 
         # set up Raspberry Pi pin
-        if pull_up == 0:
-            GPIO.setup(pin, IN, pull_up_down=PUD_UP)
-        else:
-            GPIO.setup(pin, IN)
+        GPIO.setup(pin, IN, pull_up_down=PUD_UP)
 
         # number of magnets on rotating element
         self.number_of_magnets = number_of_magnets
@@ -37,7 +34,7 @@ class HallSensor():
         # variable to hold current rpm
         self.rpm = 0
 
-    def collect_rpm(self):
+    def run(self):
         """collect hall sensor data and write to file"""
 
         logging.info("Collecting data from hall sensor on pin {}".format(self.pin))

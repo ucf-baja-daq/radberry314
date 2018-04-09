@@ -10,10 +10,15 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 
 class HallSensor():
-    """read data from a hall sensor on a Raspberry Pi 3"""
+    """read data from writer_comm hall sensor on writer_comm Raspberry Pi 3"""
 
-    def __init__(self, pin, number_of_magnets, identifier, w, a):
-        logging.info("Setting up hall sensor on pin {}".format(pin))
+    def __init__(self, pin, number_of_magnets, identifier, writer, writer_comm, log_file_handler, log_stream_handler):
+        # set up log using handlers from main process
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(log_file_handler)
+        self.logger.addHandler(log_stream_handler)
+
+        self.logger.info("Setting up hall sensor on pin {}".format(pin))
 
         # Raspberry Pi pin that hall sensor is connected to
         self.pin = pin
@@ -24,9 +29,9 @@ class HallSensor():
         # number of magnets on rotating element
         self.number_of_magnets = number_of_magnets
 
-        self.a = a
+        self.writer_comm = writer_comm
 
-        self.w = w
+        self.writer = writer
 
         # flag to control running loop
         self.run_flag = 1
@@ -37,7 +42,7 @@ class HallSensor():
     def run(self):
         """collect hall sensor data and write to file"""
 
-        logging.info("Collecting data from hall sensor on pin {}".format(self.pin))
+        self.logger.info("Collecting data from hall sensor on pin {}".format(self.pin))
 
         # timing variables
         t1 = time()
@@ -71,8 +76,10 @@ class HallSensor():
                 # calculate current rpm
                 self.rpm = 60 / self.number_of_magnets / elapsed_time
 
+                logger.
+
                 # write data point to file
-                self.a.send(','.join([str(current_time), str(self.rpm)]) + "\n")
+                self.writer_comm.send(','.join([str(current_time), str(self.rpm)]) + "\n")
                 print(','.join([str(current_time), str(self.rpm)]))
 
             elif input == LOW and passing_flag == True:
@@ -81,8 +88,8 @@ class HallSensor():
                 # set passing_flag false so program reads next magnet pass
                 passing_flag = False
 
-        self.a.send("c")
-        self.a.close()
+        self.writer_comm.send("c")
+        self.writer_comm.close()
 
         def set_flag(self, flag):
             """Set running flag false to end loop"""

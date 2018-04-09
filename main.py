@@ -256,14 +256,20 @@ if __name__ == "__main__":
                     hall_writer_primary = mp.Process(target=writer, args=(hall_rec_primary,hall_file_primary,1,))
                     hall_writer_secondary = mp.Process(target=writer, args=(hall_rec_secondary,hall_file_secondary,1,))
 
-                    # create two hall sensor processes
+                    hall_writer_primary.name = "PrimaryHallWriterProcess"
+                    hall_writer_secondary.name = "SecondaryHallWriterProcess"
+
+                    # create two hall sensor objects
                     # TODO make number of magnets a variable
-                    hall_primary = HallSensor(pin.HALL_SEN_PRIMARY, 1, "primary", hall_writer_primary, hall_send_primary)
-                    hall_secondary = HallSensor(pin.HALL_SEN_SECONDARY, 3, "secondary", hall_writer_secondary, hall_send_secondary)
+                    hall_primary = HallSensor(pin.HALL_SEN_PRIMARY, 1, "primary", hall_writer_primary, hall_send_primary, log_file_handler, log_stream_handler)
+                    hall_secondary = HallSensor(pin.HALL_SEN_SECONDARY, 3, "secondary", hall_writer_secondary, hall_send_secondary, log_file_handler, log_stream_handler)
 
                     # create hall sensor collection processes
                     hall_collect_primary = mp.Process(target=hall_primary.run, args=())
                     hall_collect_secondary = mp.Process(target=hall_secondary.run, args=())
+
+                    hall_collect_primary.name = "PrimaryHallCollectorProcess"
+                    hall_collect_secondary.name = "SecondaryHallCollectorProcess"
 
                     # begin hall sensor writer processes
                     hall_writer_primary.start()
